@@ -20,3 +20,7 @@ Add notes for the next release here under the headings Added, Changed, Fixed, or
 - Offline fallback: shows a random verse from the bundled `quotes.txt` when there is no connection.
 - Left-click for the next verse; automatic rotation on a timer (default every 30 minutes).
 - All appearance and timing settings centralized in `@Resources/Variables.inc`.
+- `.rmskin` installer built and attached to the GitHub Release automatically via GitHub Actions
+  (`.github/workflows/rmskin.yml`).
+- `RMSKIN.ini` packaging metadata; it is the single source of truth for the version.
+- Developer guide in `docs/DEVELOPER.md`.

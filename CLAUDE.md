@@ -12,7 +12,7 @@ verse; it also rotates on a timer.
 ## Architecture
 
 ```
-AlQuranQuote/
+Skins/AlQuranQuote/           Skin folder (this layout is what the rmskin packager expects).
   AlQuranQuote.ini            Skin structure only: [Rainmeter], [Metadata], measures, meters.
   @Resources/
     Variables.inc             All tunables (colors, fonts, sizes, RotateEvery). Themed here.
@@ -20,7 +20,12 @@ AlQuranQuote/
     Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, repaints.
     Scripts/QuoteFile.lua      readLines(path), parseLine(line): offline file I/O and parsing.
     quotes.txt                Offline verses, one "English | Quran X:Y" per line.
+RMSKIN.ini                    Packaging metadata read by the rmskin packager.
+.github/workflows/rmskin.yml  CI: builds the .rmskin and attaches it to the release on a v* tag.
 ```
+
+Paths inside `RMSKIN.ini` (`LoadName`, `VariableFiles`) are relative to `Skins/`, so they stay
+`AlQuranQuote\...` even though the folder now lives under `Skins/`.
 
 Data flow:
 
@@ -57,10 +62,13 @@ never settles, so `FinishAction` never fires and the skin stays on "Loading vers
 - No bundled font or image binaries: use a system font and a Shape panel.
 - Never hardcode magic numbers; name them in `Variables.inc` or as Lua locals.
 - Test on Windows with Rainmeter before shipping; package a release as a `.rmskin`.
+- Version single source of truth: `RMSKIN.ini` `[rmskin] Version`. Edit the version only there. CI
+  stamps that value into the skin's `[Metadata] Version` at build time (do not hand-edit `[Metadata]
+  Version`), and on a `v*` tag CI fails the release if the tag does not match `RMSKIN.ini`. The git
+  tag and the `CHANGELOG.md` heading must equal the `RMSKIN.ini` version.
 - Update `CHANGELOG.md` on every release: record changes under the `[Unreleased]` section as you work,
-  then move them into a new dated, version-numbered section at release time. Follow the Keep a
-  Changelog format and Semantic Versioning, and keep the `Version` field in `AlQuranQuote.ini`
-  `[Metadata]` in sync with the changelog version.
+  then move them into a new dated section headed with the `RMSKIN.ini` version at release time. Follow
+  the Keep a Changelog format and Semantic Versioning.
 - No em dash (the long dash, Unicode U+2014) anywhere in text, content, code comments, docs, or commit
   messages. Use a regular hyphen, a comma, or reword.
 

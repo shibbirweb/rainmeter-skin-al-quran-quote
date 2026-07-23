@@ -1,0 +1,65 @@
+name: Package rmskin
+
+# Builds the .rmskin installer with 2bndy5/rmskin-action (it reads RMSKIN.ini and the Skins/ folder at
+# the repo root). RMSKIN.ini [rmskin] Version is the single source of truth: this workflow reads it,
+# stamps the same value into the skin's [Metadata] Version, and (on a v* tag) fails the release if the
+# tag does not match. On a version tag the installer is attached to that tag's GitHub Release; a manual
+# run just produces a downloadable build artifact.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from RMSKIN.ini
+        id: version
+        run: |
+          version="$(grep -m1 -E '^[[:space:]]*Version[[:space:]]*=' RMSKIN.ini | sed -E 's/^[^=]*=[[:space:]]*//' | tr -d '\r' | xargs)"
+          if [ -z "$version" ]; then
+            echo "::error::Could not read Version from RMSKIN.ini"
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "RMSKIN.ini version: $version"
+
+      - name: Verify tag matches RMSKIN.ini version
+        if: github.ref_type == 'tag'
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$tag_version" != "${{ steps.version.outputs.value }}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match RMSKIN.ini Version ${{ steps.version.outputs.value }}. Bump RMSKIN.ini first."
+            exit 1
+          fi
+
+      - name: Stamp version into skin [Metadata]
+        run: |
+          sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" Skins/AlQuranQuote/AlQuranQuote.ini
+
+      - name: Build .rmskin
+        id: builder
+        uses: 2bndy5/rmskin-action@v2.0.4
+        with:
+          version: ${{ steps.version.outputs.value }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rmskin
+          path: ${{ steps.builder.outputs.arc_name }}
+
+      - name: Attach to GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.builder.outputs.arc_name }}
