@@ -1,0 +1,7 @@
+# Rainmeter build output
+*.rmskin
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
