@@ -30,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A small next-verse control next to the reference fetches the next verse.
 - The settings panel's look is defined in its own `Settings/@Resources/SettingsTheme.inc`, kept separate
   from the skin's variables, so editing the skin never restyles the panel.
-- Author website URL (https://shibbirweb.github.io) in the skin's `[Metadata] Information`.
+- Author website URL (https://shibbirweb.github.io) in the `[Metadata] Information` of both the main skin
+  and the settings panel; the settings panel also carries Version (CI-stamped) and License metadata.
 
 ### Changed
 

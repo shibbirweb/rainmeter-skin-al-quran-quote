@@ -45,6 +45,7 @@ jobs:
       - name: Stamp version into skin [Metadata]
         run: |
           sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" Skins/AlQuranQuote/AlQuranQuote.ini
+          sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" Skins/AlQuranQuote/Settings/Settings.ini
 
       - name: Build .rmskin
         id: builder

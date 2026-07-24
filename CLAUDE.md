@@ -137,9 +137,10 @@ the reference line, NOT by clicking the window (the panel has no click action; i
 - Never hardcode magic numbers; name them in `Variables.inc` or as Lua locals.
 - Test on Windows with Rainmeter before shipping; package a release as a `.rmskin`.
 - Version single source of truth: `RMSKIN.ini` `[rmskin] Version`. Edit the version only there. CI
-  stamps that value into the skin's `[Metadata] Version` at build time (do not hand-edit `[Metadata]
-  Version`), and on a `v*` tag CI fails the release if the tag does not match `RMSKIN.ini`. The git
-  tag and the `CHANGELOG.md` heading must equal the `RMSKIN.ini` version.
+  stamps that value into both skins' `[Metadata] Version` (`AlQuranQuote.ini` and `Settings/Settings.ini`)
+  at build time (do not hand-edit `[Metadata] Version`), and on a `v*` tag CI fails the release if the tag
+  does not match `RMSKIN.ini`. The git tag and the `CHANGELOG.md` heading must equal the `RMSKIN.ini`
+  version.
 - Update `CHANGELOG.md` on every release: record changes under the `[Unreleased]` section as you work,
   then move them into a new dated section headed with the `RMSKIN.ini` version at release time. Follow
   the Keep a Changelog format and Semantic Versioning.
