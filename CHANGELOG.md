@@ -48,6 +48,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Verses now load on machines with proxy auto-detection (WPAD) enabled. `[MeasureQuran]` sets
+  `ProxyServer=/none` to force a direct connection; WebParser otherwise uses the system/IE proxy config,
+  which could hang the download indefinitely (no `FinishAction`, no error) and leave the skin stuck on
+  "Loading verse...".
+- The panel no longer gets stuck on "Loading verse..." when the verse download fails. `[MeasureQuran]`
+  now has an `OnDownloadErrorAction` that falls back to an offline verse, alongside the existing connect
+  and regex error handlers (a failed HTTPS download, e.g. through a proxy or antivirus, previously left no
+  handler to run).
 - The settings icon no longer overlaps the verse text; the verse now starts below the icon.
 
 ## [1.0.0] - 2026-07-23

@@ -57,6 +57,15 @@ Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
 never settles, so `FinishAction` never fires and the skin stays on "Loading verse...".
 
+Gotcha: `[MeasureQuran]` sets `ProxyServer=/none`. WebParser defaults to the system/IE proxy config, so on
+a machine with proxy auto-detection (WPAD) enabled the download can hang indefinitely: the log shows
+`Fetching:` but no `Finished` and no error action ever fires (neither `OnConnectErrorAction`,
+`OnDownloadErrorAction`, nor `OnRegExpErrorAction` runs on a hang), so the skin stays on "Loading
+verse...". The value must be exactly `/none` with the leading slash: WebParser maps `/none` to a direct
+connection (`INTERNET_OPEN_TYPE_DIRECT`) and `/auto` to the system proxy; any other string (including
+`None` without the slash) is treated as a literal proxy hostname and still hangs. Do NOT remove it or drop
+the slash.
+
 Settings panel: the settings icon on the main panel toggles `AlQuranQuote\Settings` (Settings.ini) via
 `!ToggleConfig`. It lives in the `Settings/` subfolder on purpose: a subfolder is a separate Rainmeter
 config, so it runs alongside the main skin. A sibling `.ini` in the same folder would be a variant of the
