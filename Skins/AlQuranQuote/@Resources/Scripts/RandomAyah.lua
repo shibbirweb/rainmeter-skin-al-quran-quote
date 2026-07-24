@@ -1,6 +1,7 @@
 -- RandomAyah.lua : entry points the skin calls.
 --   Online()          show the verse WebParser just downloaded
 --   Offline()         show a random verse from the bundled quotes file
+--   nextVerse()       show the next verse from the active source (custom / online / offline)
 --   refreshDisplay()  called by the settings panel after a reference/custom change (no refetch)
 -- Helpers live in Verse.lua (applyVerse, refreshReference, composeReferenceText) and QuoteFile.lua
 -- (readLines, parseLine). When CustomVerseEnabled is 1 the skin shows the user's custom verse instead of
@@ -11,9 +12,12 @@ function Initialize()
 	dofile(resourcesFolder .. 'Scripts\\Verse.lua')
 	dofile(resourcesFolder .. 'Scripts\\QuoteFile.lua')
 	math.randomseed(os.time())
-	-- Show the custom verse immediately on load rather than waiting for the (ignored) initial download.
+	-- Show the right verse immediately on load rather than waiting for the (possibly ignored) download:
+	-- a custom verse, or an offline verse when online fetching is off.
 	if customVerseEnabled() then
 		applyCustomVerse()
+	elseif not onlineFetchEnabled() then
+		Offline()
 	end
 end
 
@@ -24,6 +28,27 @@ end
 -- True when the skin is in custom-verse mode.
 function customVerseEnabled()
 	return tonumber(SKIN:GetVariable('CustomVerseEnabled')) == 1
+end
+
+-- True when fetching verses from the online API is enabled.
+function onlineFetchEnabled()
+	return tonumber(SKIN:GetVariable('OnlineFetchEnabled')) == 1
+end
+
+-- Show the next verse from the active source: the custom verse if enabled, a fresh online download if
+-- online fetching is on, otherwise a new offline verse. Called by the next-verse control and the rotation
+-- timer, and by the settings panel when the online-fetch toggle changes.
+function nextVerse()
+	if customVerseEnabled() then
+		applyCustomVerse()
+		return
+	end
+	if onlineFetchEnabled() then
+		SKIN:Bang('!CommandMeasure', 'MeasureQuran', 'Update')
+		SKIN:Bang('!UpdateMeasure', 'MeasureQuran')
+		return
+	end
+	Offline()
 end
 
 -- Show the user's custom verse. The reference key is the manual chapter:verse, but only when BOTH numbers
@@ -39,10 +64,14 @@ function applyCustomVerse()
 	applyVerse(customText, verseKey)
 end
 
--- Show the verse WebParser just parsed into the child measures (unless custom mode is on).
+-- Show the verse WebParser just parsed into the child measures (unless custom mode is on, or online
+-- fetching is off in which case the initial background download is ignored and the offline verse stays).
 function Online()
 	if customVerseEnabled() then
 		applyCustomVerse()
+		return
+	end
+	if not onlineFetchEnabled() then
 		return
 	end
 	local englishTranslation = SKIN:GetMeasure('MeasureEnglish'):GetStringValue()

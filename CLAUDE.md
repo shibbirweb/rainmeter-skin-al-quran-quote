@@ -61,13 +61,21 @@ Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
 never settles, so `FinishAction` never fires and the skin stays on "Loading verse...".
 
+Verse source: the next-verse control and the rotation tick both call `RandomAyah.lua`'s `nextVerse()`,
+which picks the source: the custom verse if `#CustomVerseEnabled#` is 1, else an online download if
+`#OnlineFetchEnabled#` is 1 (`CommandMeasure MeasureQuran "Update"` + `!UpdateMeasure`), else a new offline
+verse from `quotes.txt`. When online fetching is off, `Online()` ignores the one background download that
+still happens on load (it returns early), and `Initialize` shows an offline verse immediately. The settings
+panel's "open fallback file" control runs `[notepad "#ROOTCONFIGPATH#@Resources\quotes.txt"]` so the user
+can edit the offline verses; `Offline()` re-reads the file each time, so no refresh is needed.
+
 Custom verse: when `#CustomVerseEnabled#` is 1 the skin shows the user's `#CustomText#` with the manual
 `#SuraNumber#:#VerseNumberManual#` as the reference key, instead of fetching. Both numbers are nullable: if
 either is empty the key is empty and the reference shows just the label (centered). `RandomAyah.lua`'s
-`Online`/`Offline`/`refreshDisplay` route to `applyCustomVerse()` in this mode, the rotation tick is gated
-off (`&& (#CustomVerseEnabled# = 0)`), and the next-verse control is hidden (`Hidden=#CustomVerseEnabled#`),
-so a stray download can never overwrite the custom verse. Toggling the mode off issues a `CommandMeasure
-MeasureQuran "Update"` to fetch a fresh verse. `#ShowReferenceLabel#` and `#ShowVerseNumber#` toggle the two
+`Online`/`Offline`/`refreshDisplay`/`nextVerse` route to `applyCustomVerse()` in this mode, the rotation
+tick is gated off (`&& (#CustomVerseEnabled# = 0)`), and the next-verse control is hidden
+(`Hidden=#CustomVerseEnabled#`), so a stray download can never overwrite the custom verse. Toggling the mode
+off calls `nextVerse()` to show a fresh verse. `#ShowReferenceLabel#` and `#ShowVerseNumber#` toggle the two
 parts of the reference line and apply in both modes. The three text inputs (custom text, sura, verse) write
 `$UserInput$` into a working variable and then call a `commit*` Lua function that reads it back, so an
 apostrophe in the text cannot break the command (double quotes still can, a Rainmeter InputText limit).

@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom verse: show your own text with an optional manual sura and verse number (both nullable) instead
     of a fetched verse; while it is on, rotation pauses and the next-verse control is hidden so the custom
     verse is never overwritten.
+  - Online fetch on/off: when off, load, rotation, and the next-verse control all draw from the offline
+    `quotes.txt` instead of hitting the API.
+  - Open the offline fallback file (`quotes.txt`) in Notepad to add or edit your own fallback verses.
   - Show or hide the settings icon on the skin, and a Reset to defaults.
 - Appearance and reference changes apply to the running skin live (via `!SetVariable`) without refetching a
   verse; only Reset refreshes. The reference line is composed in Lua so a hidden part leaves no gap and a

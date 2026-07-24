@@ -45,6 +45,7 @@ local defaults = {
 	CustomText = '',
 	SuraNumber = '',
 	VerseNumberManual = '',
+	OnlineFetchEnabled = 1,
 }
 
 function Initialize()
@@ -302,6 +303,7 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'ShowReferenceLabel', state.showReferenceLabel)
 	SKIN:Bang('!SetVariable', 'ShowVerseNumber', state.showVerseNumber)
 	SKIN:Bang('!SetVariable', 'CustomVerseEnabled', state.customVerseEnabled)
+	SKIN:Bang('!SetVariable', 'OnlineFetchEnabled', state.onlineFetchEnabled)
 	SKIN:Bang('!SetVariable', 'WorkCustomText', state.customText)
 	SKIN:Bang('!SetVariable', 'WorkSuraNumber', state.suraNumber)
 	SKIN:Bang('!SetVariable', 'WorkVerseNumber', state.verseNumber)
@@ -356,6 +358,7 @@ function loadSettings()
 		showReferenceLabel = tonumber(SKIN:GetVariable('ShowReferenceLabel')) or 1,
 		showVerseNumber = tonumber(SKIN:GetVariable('ShowVerseNumber')) or 1,
 		customVerseEnabled = tonumber(SKIN:GetVariable('CustomVerseEnabled')) or 0,
+		onlineFetchEnabled = tonumber(SKIN:GetVariable('OnlineFetchEnabled')) or 1,
 		customText = SKIN:GetVariable('CustomText'),
 		suraNumber = SKIN:GetVariable('SuraNumber'),
 		verseNumber = SKIN:GetVariable('VerseNumberManual'),
@@ -661,6 +664,22 @@ function toggleCustomVerse()
 	updatePanel()
 end
 
+-- Toggle online fetching. Applying it live via nextVerse() shows the right verse immediately: an online
+-- download when turned on, or an offline verse when turned off.
+function toggleOnlineFetch()
+	local enabled = tonumber(SKIN:GetVariable('OnlineFetchEnabled'))
+	if enabled == 1 then
+		enabled = 0
+	else
+		enabled = 1
+	end
+	SKIN:Bang('!SetVariable', 'OnlineFetchEnabled', enabled)
+	persist('OnlineFetchEnabled', enabled)
+	SKIN:Bang('!SetVariable', 'OnlineFetchEnabled', enabled, mainConfigName)
+	SKIN:Bang('!CommandMeasure', 'MeasureRandom', 'nextVerse()', mainConfigName)
+	updatePanel()
+end
+
 -- The three inputs write their typed value to a working variable first (so an apostrophe cannot break the
 -- command), then call these to read it back and apply. The number fields are nullable.
 function commitCustomText()
@@ -766,6 +785,7 @@ function resetSettings()
 		showReferenceLabel = defaults.ShowReferenceLabel,
 		showVerseNumber = defaults.ShowVerseNumber,
 		customVerseEnabled = defaults.CustomVerseEnabled,
+		onlineFetchEnabled = defaults.OnlineFetchEnabled,
 		customText = defaults.CustomText,
 		suraNumber = defaults.SuraNumber,
 		verseNumber = defaults.VerseNumberManual,

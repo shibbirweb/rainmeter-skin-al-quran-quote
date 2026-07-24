@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=386
+SettingsHeight=424
 Col1X=16
 Col2X=316
 Pad=16
@@ -97,19 +97,21 @@ BorderOpacityBaseY=256
 WidthBaseY=78
 HeightBaseY=148
 ShowIconBaseY=218
-; Tab 3 (Verse): left column = rotation + duration + reference label + show toggles; right column =
-; custom verse + custom text + sura + verse.
+; Tab 3 (Verse): left column = rotation + duration + online fetch + reference label + show toggles; right
+; column = custom verse + custom text + sura + verse + open fallback file.
 RotateToggleBaseY=78
 DurationBaseY=126
-ReferenceLabelBaseY=174
-ShowReferenceLabelBaseY=222
-ShowVerseNumberBaseY=270
+OnlineFetchBaseY=174
+ReferenceLabelBaseY=222
+ShowReferenceLabelBaseY=270
+ShowVerseNumberBaseY=318
 CustomVerseBaseY=78
 CustomTextBaseY=126
 SuraNumberBaseY=174
 VerseNumberBaseY=222
+OpenFallbackBaseY=270
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs).
-ResetBaseY=340
+ResetBaseY=380
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
 FontListTop=116
