@@ -13,12 +13,20 @@ verse; it also rotates on a timer.
 
 ```
 Skins/AlQuranQuote/           Skin folder (this layout is what the rmskin packager expects).
-  AlQuranQuote.ini            Skin structure only: [Rainmeter], [Metadata], measures, meters.
+  AlQuranQuote.ini            Main skin structure: [Rainmeter], [Metadata], measures, meters, settings icon.
+  Settings/
+    Settings.ini              Settings panel (a child config toggled by the settings icon). Font list,
+                              color sliders, opacity range; applies changes via Settings.lua.
+    @Resources/
+      SettingsTheme.inc       The panel's OWN look + layout + curated font list + working state. Separate
+                              from the skin's Variables.inc so editing the skin never restyles the panel.
   @Resources/
-    Variables.inc             All tunables (colors, fonts, sizes, RotateEvery). Themed here.
+    Variables.inc             All tunables (colors, fonts, sizes, styles, RotateEvery, bounds). Themed here.
     Scripts/RandomAyah.lua     Entry points: Initialize, Update, Online, Offline.
     Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, repaints.
     Scripts/QuoteFile.lua      readLines(path), parseLine(line): offline file I/O and parsing.
+    Scripts/Settings.lua       Backs the settings panel: seed working vars on open, apply changes to the
+                              main skin (no refetch), no self-refresh of the panel.
     quotes.txt                Offline verses, one "English | Quran X:Y" per line.
 RMSKIN.ini                    Packaging metadata read by the rmskin packager.
 .github/workflows/rmskin.yml  CI: builds the .rmskin and attaches it to the release on a v* tag.
@@ -45,6 +53,38 @@ Data flow:
 Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent. WebParser downloads
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
 never settles, so `FinishAction` never fires and the skin stays on "Loading verse...".
+
+Settings panel: the settings icon on the main panel toggles `AlQuranQuote\Settings` (Settings.ini) via
+`!ToggleConfig`. It lives in the `Settings/` subfolder on purpose: a subfolder is a separate Rainmeter
+config, so it runs alongside the main skin. A sibling `.ini` in the same folder would be a variant of the
+same config and would replace the main panel instead. The panel reads two variable files: its own
+`Settings\@Resources\SettingsTheme.inc` (its look, layout, curated font list, and working state) and the
+parent `@Resources\Variables.inc` via `#ROOTCONFIGPATH#` (only to seed the controls with current values).
+Keeping the panel's look in its own file is deliberate: editing the skin never restyles the panel.
+
+Controls: a click-to-open curated font list, sliders for font size and for each color channel (font color
+R/G/B/A, background R/G/B), a range slider for background opacity, three buttons for font style, and a
+typed field for the rotation duration. Sliders are Shape meters (track + fill); click sets the value from
+`$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step. Live
+slider state lives in settings-owned working variables (`WorkFontSize`, `FontColorR..A`, `BgColorR..B`,
+`WorkOpacity`, `WorkFontFamily`, `WorkDuration`) that `Settings.lua` seeds on open.
+
+Apply path (in `Settings.lua`): on any change it writes the value to the parent `Variables.inc` with
+`!WriteKeyValue`, then applies it to the running main skin. Appearance changes use
+`!SetVariable ... "AlQuranQuote"` + `!UpdateMeter`/`!Redraw` so the verse does NOT refetch; only the
+duration change uses `!Refresh "AlQuranQuote"` (needed for the WebParser `UpdateRate` to pick up the new
+value). The settings panel is never refreshed; its previews update in place via `!UpdateMeter`/`!Redraw`.
+Because the panel reloads its `Initialize` each time it is toggled on, it always opens showing current
+values. Do NOT reintroduce a self-refresh of the settings config.
+
+Icons are vector Shapes, not font glyphs: the main panel's open icon is three lines with knobs and the
+panel's close icon is a crossed X. This avoids the mojibake that appears when a `.ini` with non-ASCII
+glyphs is read as ANSI. Keep the skin files ASCII; if any file ever needs non-ASCII, save it as UTF-8 with
+a BOM (Rainmeter reads UTF-8 without a BOM as ANSI).
+
+Background color is stored as two variables, `PanelColorRGB` and `PanelOpacity`, so opacity can be changed
+without touching the color; the panel fill composes them as `#PanelColorRGB#,#PanelOpacity#`. `QuoteStyle`
+holds a Rainmeter `StringStyle` keyword (`Bold`, `Normal`, or `Italic`).
 
 ## Rules and conventions
 
