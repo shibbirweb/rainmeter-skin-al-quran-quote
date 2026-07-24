@@ -18,10 +18,11 @@ end
 function Online()
 	local englishTranslation = SKIN:GetMeasure('MeasureEnglish'):GetStringValue()
 	local verseKey = SKIN:GetMeasure('MeasureKey'):GetStringValue()
-	applyVerse(englishTranslation, 'Quran ' .. verseKey)
+	applyVerse(englishTranslation, verseKey)
 end
 
--- Fall back to a random line from @Resources\quotes.txt.
+-- Fall back to a random line from @Resources\quotes.txt. The bundled reference is like "Quran X:Y"; take
+-- just the chapter:verse so the editable label (ReferenceLabel) is what shows in front of it.
 function Offline()
 	local offlineLines = readLines(SKIN:GetVariable('@') .. 'quotes.txt')
 	if #offlineLines == 0 then
@@ -29,5 +30,9 @@ function Offline()
 	end
 	local randomIndex = math.random(#offlineLines)
 	local quoteText, reference = parseLine(offlineLines[randomIndex])
-	applyVerse(quoteText, reference)
+	local verseKey = reference:match('%d+:%d+')
+	if verseKey == nil then
+		verseKey = reference
+	end
+	applyVerse(quoteText, verseKey)
 end

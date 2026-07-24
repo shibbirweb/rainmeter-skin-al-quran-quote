@@ -6,7 +6,7 @@
 
 ; ---- Panel look ----
 SettingsWidth=300
-SettingsHeight=824
+SettingsHeight=978
 Pad=16
 Radius=12
 SettingsBg=24,28,34,245
@@ -64,16 +64,19 @@ ResetButtonColor=235,235,235,255
 
 ; ---- Block base-Y positions (top of each setting block; stacked top to bottom) ----
 FamilyBaseY=44
-SizeBaseY=116
+SizeBaseY=118
 StyleBaseY=166
-FontColorBaseY=216
-BgColorBaseY=348
-OpacityBaseY=458
-WidthBaseY=530
-HeightBaseY=602
-RotateToggleBaseY=674
-DurationBaseY=724
-ResetBaseY=774
+FontColorBaseY=214
+BgColorBaseY=346
+OpacityBaseY=454
+BorderOpacityBaseY=524
+WidthBaseY=594
+HeightBaseY=664
+ShowIconBaseY=734
+RotateToggleBaseY=782
+DurationBaseY=830
+ReferenceLabelBaseY=878
+ResetBaseY=926
 
 ; ---- Curated font list ----
 FontListTop=82

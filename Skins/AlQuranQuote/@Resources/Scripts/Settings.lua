@@ -15,6 +15,7 @@ local fontColor = { red = 240, green = 240, blue = 240, alpha = 255 }
 local backgroundColor = { red = 18, green = 22, blue = 28 }
 local fontSize = 13
 local backgroundOpacity = 205
+local borderOpacity = 25
 local autoChange = 1
 local rotateEvery = 1800
 
@@ -22,10 +23,14 @@ local rotateEvery = 1800
 local defaults = {
 	QuoteFont = 'Georgia',
 	QuoteSize = 13,
-	QuoteStyle = 'Italic',
+	QuoteStyle = 'Normal',
 	QuoteColor = '240,240,240,255',
 	PanelColorRGB = '18,22,28',
 	PanelOpacity = 205,
+	PanelBorderRGB = '255,255,255',
+	PanelBorderOpacity = 25,
+	ReferenceLabel = 'Al Quran',
+	SettingsIconHidden = 0,
 	RotateEvery = 1800,
 	AutoChange = 1,
 	WidthAuto = 1,
@@ -187,6 +192,7 @@ local function seedWorkingState(state)
 	backgroundColor.blue = state.bgColor.blue
 	fontSize = state.fontSizeValue
 	backgroundOpacity = state.opacity
+	borderOpacity = state.borderOpacity
 	autoChange = state.autoChangeValue
 	rotateEvery = state.duration
 
@@ -195,6 +201,9 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'WorkStyle', state.style)
 	SKIN:Bang('!SetVariable', 'WorkDuration', rotateEvery)
 	SKIN:Bang('!SetVariable', 'WorkOpacity', backgroundOpacity)
+	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
+	SKIN:Bang('!SetVariable', 'WorkReferenceLabel', state.referenceLabel)
+	SKIN:Bang('!SetVariable', 'SettingsIconHidden', state.iconHidden)
 	SKIN:Bang('!SetVariable', 'FontColorR', fontColor.red)
 	SKIN:Bang('!SetVariable', 'FontColorG', fontColor.green)
 	SKIN:Bang('!SetVariable', 'FontColorB', fontColor.blue)
@@ -236,6 +245,9 @@ function loadSettings()
 		style = SKIN:GetVariable('QuoteStyle'),
 		duration = readNumber('RotateEvery'),
 		opacity = clampRound(readNumber('PanelOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
+		borderOpacity = clampRound(readNumber('PanelBorderOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
+		referenceLabel = SKIN:GetVariable('ReferenceLabel'),
+		iconHidden = tonumber(SKIN:GetVariable('SettingsIconHidden')) or 0,
 		fontColor = {
 			red = fontColorParts[1] or 240,
 			green = fontColorParts[2] or 240,
@@ -496,6 +508,61 @@ function setDuration(value)
 	updatePanel()
 end
 
+-- ---- Reference label ----
+
+function setReferenceLabel(text)
+	SKIN:Bang('!SetVariable', 'WorkReferenceLabel', text)
+	applyAppearance('ReferenceLabel', text)
+	updatePanel()
+end
+
+-- ---- Border opacity (range + manual) ----
+
+function setBorderOpacityPercent(percent)
+	local minimum = readNumber('MinPanelOpacity')
+	local maximum = readNumber('MaxPanelOpacity')
+	borderOpacity = clampRound(minimum + (maximum - minimum) * tonumber(percent) / 100, minimum, maximum)
+	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
+	applyAppearance('PanelBorderOpacity', borderOpacity)
+	updatePanel()
+end
+
+function nudgeBorderOpacity(step)
+	local minimum = readNumber('MinPanelOpacity')
+	local maximum = readNumber('MaxPanelOpacity')
+	borderOpacity = clampRound(borderOpacity + step, minimum, maximum)
+	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
+	applyAppearance('PanelBorderOpacity', borderOpacity)
+	updatePanel()
+end
+
+function setBorderOpacityValue(value)
+	local number = tonumber(value)
+	if number == nil then
+		return
+	end
+	borderOpacity = clampRound(number, readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity'))
+	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
+	applyAppearance('PanelBorderOpacity', borderOpacity)
+	updatePanel()
+end
+
+-- ---- Settings icon visibility ----
+
+function toggleShowIcon()
+	local hidden = tonumber(SKIN:GetVariable('SettingsIconHidden'))
+	if hidden == 1 then
+		hidden = 0
+	else
+		hidden = 1
+	end
+	SKIN:Bang('!SetVariable', 'SettingsIconHidden', hidden)
+	applyLiveVariable('SettingsIconHidden', hidden)
+	SKIN:Bang('!UpdateMeter', 'MeterSettingsGear', mainConfigName)
+	SKIN:Bang('!Redraw', mainConfigName)
+	updatePanel()
+end
+
 -- ---- Reset ----
 
 function resetSettings()
@@ -512,6 +579,9 @@ function resetSettings()
 		style = defaults.QuoteStyle,
 		duration = defaults.RotateEvery,
 		opacity = defaults.PanelOpacity,
+		borderOpacity = defaults.PanelBorderOpacity,
+		referenceLabel = defaults.ReferenceLabel,
+		iconHidden = defaults.SettingsIconHidden,
 		fontColor = {
 			red = fontColorParts[1],
 			green = fontColorParts[2],

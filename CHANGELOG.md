@@ -21,8 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Quote change duration (seconds between verses).
   - Panel width: automatic, or a fixed pixel width.
   - Panel height: automatic (grows to fit), or a fixed pixel height.
-  - Automatic rotation on/off (when off, the verse stays until you click it).
+  - Automatic rotation on/off (when off, the verse stays until you fetch the next one).
+  - Editable reference label (the text before the verse key), default "Al Quran".
+  - Rounded border opacity.
+  - Show or hide the settings icon on the quote window (when hidden, reopen the settings skin from
+    Rainmeter's Manage dialog).
   - Reset all settings to their defaults.
+- A small next-verse control next to the reference fetches the next verse.
 - The settings panel's look is defined in its own `Settings/@Resources/SettingsTheme.inc`, kept separate
   from the skin's variables, so editing the skin never restyles the panel.
 
@@ -30,7 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Split the background `PanelColor` variable into `PanelColorRGB` (color) and `PanelOpacity` (alpha) so
   opacity can be changed independently of the color.
-- The verse font style is now driven by a `QuoteStyle` variable (was a hardcoded `StringStyle=Italic`).
+- The verse font style is now driven by a `QuoteStyle` variable (was a hardcoded `StringStyle=Italic`);
+  the default font style is now Regular.
+- The verse no longer changes when the quote window is clicked; use the next-verse control instead.
 - Settings changes apply to the running skin without refetching a new verse (only Reset refreshes the
   skin); the settings panel no longer refreshes itself when a value changes.
 - Verse rotation is driven by a timer decoupled from the download, so toggling automatic rotation or

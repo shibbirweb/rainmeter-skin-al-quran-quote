@@ -40,15 +40,19 @@ Data flow:
 1. `[MeasureQuran]` (WebParser) fetches
    `https://api.quran.com/api/v4/verses/random?language=en&translations=20`
    (translation resource 20 = Saheeh International). `verses/random` returns a new verse on every real
-   download, so no cache-buster is needed. `UpdateRate=#RotateEvery#` re-downloads on a timer
-   (rotation); clicking the panel runs `[!CommandMeasure MeasureQuran "Update"]` to fetch immediately.
+   download, so no cache-buster is needed. The parent's own download timer is disabled with a very large
+   `UpdateRate=#WebParserIdleRate#`; the verse is (re)fetched only by forced `[!CommandMeasure MeasureQuran
+   "Update"]` calls, from `OnRefreshAction` (initial load), `[MeasureRotateTick]` (rotation), and the
+   next-verse icon. See the rotation note below.
 2. Child measures extract fields via `StringIndex` from the regex
    `(?siU)"verse_key":"(.*)".*"text":"(.*)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
    translation (HTML tags stripped via `RegExpSubstitute`).
 3. On success `FinishAction` calls `Online()`, which reads the child measures and calls
-   `applyVerse(english, "Quran " .. key)`. On error, `On*ErrorAction` calls `Offline()`, which shows a
-   random line from `quotes.txt`.
-4. Meters display the `#QuoteText#` and `#RefText#` variables set by `applyVerse`.
+   `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows a random
+   line from `quotes.txt` (the verse key is extracted from the bundled reference with `%d+:%d+`).
+4. `applyVerse` sets `#QuoteText#` and `#VerseKey#`. The quote meter shows `#QuoteText#`; the reference
+   meter is composed as `#ReferenceLabel# #VerseKey#`, so the editable label (default "Al Quran") updates
+   the shown reference live without refetching.
 
 Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent. WebParser downloads
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
@@ -64,10 +68,10 @@ Keeping the panel's look in its own file is deliberate: editing the skin never r
 
 Controls: a click-to-open curated font list (plus a manual "type a font name" input), sliders for font
 size and for each color channel (font color R/G/B/A, background R/G/B), a range slider for background
-opacity (plus manual inputs for font color R,G,B,A, background R,G,B, and opacity), three buttons for font
-style, a typed rotation duration,
-"auto" checkboxes for width and height (each revealing a fixed-value input when unchecked), an automatic-
-rotation checkbox, and a Reset button. Sliders are Shape meters (track + fill); click sets the value from
+opacity (plus manual inputs for font color R,G,B,A, background R,G,B, and opacity), a border-opacity slider,
+three buttons for font style, an editable reference label, a typed rotation duration, "auto" checkboxes for
+width and height (each revealing a fixed-value input when unchecked), an automatic-rotation checkbox, a
+show-settings-icon checkbox, and a Reset button. Sliders are Shape meters (track + fill); click sets the value from
 `$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step.
 Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
 near-transparent fill so the whole box is clickable. Reveal-on-uncheck inputs use the `WidthInput` /
@@ -83,13 +87,15 @@ resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed 
 height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
 it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.
 
-Rotation is decoupled from downloads. `[MeasureQuran]` has `UpdateDivider=-1` (download once on load,
-never on its own timer). `[MeasureRotateTick]` (a `Calc` that counts one per second) forces
-`[!CommandMeasure MeasureQuran "Update"]` every `RotateEvery` seconds while `AutoChange` is 1; both are
-read dynamically, so changing the duration or toggling rotation takes effect immediately with NO refresh
-and NO refetch of the current verse. Do NOT go back to gating rotation through the WebParser's own
-download timer: changing that needs a refresh, which refetches (and toggling rotation must never change
-the displayed verse). Reset restores a `defaults` table in `Settings.lua`. The settings panel is never
+Rotation is decoupled from downloads. `[MeasureQuran]` keeps updating every cycle (default UpdateDivider)
+so completed downloads are processed and `FinishAction` fires, but its own download timer is disabled with
+a very large `UpdateRate=#WebParserIdleRate#`. The first verse is fetched by `OnRefreshAction` on load.
+`[MeasureRotateTick]` (a `Calc` that counts one per second) forces `[!CommandMeasure MeasureQuran "Update"]`
+every `RotateEvery` seconds while `AutoChange` is 1; both are read dynamically, so changing the duration or
+toggling rotation takes effect immediately with NO refresh and NO refetch of the current verse. Do NOT set
+`UpdateDivider=-1` on the WebParser: it stops the measure updating, so a forced download never gets
+processed (no new verse). And do NOT gate rotation through the WebParser's own download timer: changing
+that needs a refresh, which refetches (and toggling rotation must never change the displayed verse). Reset restores a `defaults` table in `Settings.lua`. The settings panel is never
 refreshed; its
 previews update in place via `!UpdateMeter`/`!Redraw`, and `loadSettings()`/`resetSettings()` share one
 `seedWorkingState` helper (never read a variable back right after `!SetVariable` in the same call). Because
@@ -104,9 +110,15 @@ panel's close icon is a crossed X. This avoids the mojibake that appears when a 
 glyphs is read as ANSI. Keep the skin files ASCII; if any file ever needs non-ASCII, save it as UTF-8 with
 a BOM (Rainmeter reads UTF-8 without a BOM as ANSI).
 
-Background color is stored as two variables, `PanelColorRGB` and `PanelOpacity`, so opacity can be changed
-without touching the color; the panel fill composes them as `#PanelColorRGB#,#PanelOpacity#`. `QuoteStyle`
-holds a Rainmeter `StringStyle` keyword (`Bold`, `Normal`, or `Italic`).
+Background color and border are each stored as RGB + opacity (`PanelColorRGB`/`PanelOpacity` and
+`PanelBorderRGB`/`PanelBorderOpacity`), so color and opacity change independently; the panel fill composes
+`#PanelColorRGB#,#PanelOpacity#` and the stroke `#PanelBorderRGB#,#PanelBorderOpacity#`. `QuoteStyle` holds
+a Rainmeter `StringStyle` keyword (`Bold`, `Normal`, or `Italic`); the default is `Normal` (Regular).
+
+The settings icon on the quote window is hidden when `SettingsIconHidden=1` (its meter is
+`Hidden=#SettingsIconHidden#`); when hidden, the settings panel is reopened by loading `AlQuranQuote\Settings`
+from Rainmeter's Manage dialog. The verse is changed by a small next-verse control (a vector triangle) on
+the reference line, NOT by clicking the window (the panel has no click action; it stays draggable).
 
 ## Rules and conventions
 
