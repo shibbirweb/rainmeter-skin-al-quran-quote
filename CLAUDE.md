@@ -62,20 +62,42 @@ same config and would replace the main panel instead. The panel reads two variab
 parent `@Resources\Variables.inc` via `#ROOTCONFIGPATH#` (only to seed the controls with current values).
 Keeping the panel's look in its own file is deliberate: editing the skin never restyles the panel.
 
-Controls: a click-to-open curated font list, sliders for font size and for each color channel (font color
-R/G/B/A, background R/G/B), a range slider for background opacity, three buttons for font style, and a
-typed field for the rotation duration. Sliders are Shape meters (track + fill); click sets the value from
-`$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step. Live
-slider state lives in settings-owned working variables (`WorkFontSize`, `FontColorR..A`, `BgColorR..B`,
-`WorkOpacity`, `WorkFontFamily`, `WorkDuration`) that `Settings.lua` seeds on open.
+Controls: a click-to-open curated font list (plus a manual "type a font name" input), sliders for font
+size and for each color channel (font color R/G/B/A, background R/G/B), a range slider for background
+opacity (plus manual inputs for font color R,G,B,A, background R,G,B, and opacity), three buttons for font
+style, a typed rotation duration,
+"auto" checkboxes for width and height (each revealing a fixed-value input when unchecked), an automatic-
+rotation checkbox, and a Reset button. Sliders are Shape meters (track + fill); click sets the value from
+`$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step.
+Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
+near-transparent fill so the whole box is clickable. Reveal-on-uncheck inputs use the `WidthInput` /
+`HeightInput` groups shown/hidden from Lua. Live state lives in settings-owned working variables
+(`WorkFontSize`, `FontColorR..A`, `BgColorR..B`, `WorkOpacity`, `WorkFontFamily`, `WorkDuration`,
+`WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`) that `Settings.lua` seeds on open.
 
 Apply path (in `Settings.lua`): on any change it writes the value to the parent `Variables.inc` with
-`!WriteKeyValue`, then applies it to the running main skin. Appearance changes use
-`!SetVariable ... "AlQuranQuote"` + `!UpdateMeter`/`!Redraw` so the verse does NOT refetch; only the
-duration change uses `!Refresh "AlQuranQuote"` (needed for the WebParser `UpdateRate` to pick up the new
-value). The settings panel is never refreshed; its previews update in place via `!UpdateMeter`/`!Redraw`.
-Because the panel reloads its `Initialize` each time it is toggled on, it always opens showing current
-values. Do NOT reintroduce a self-refresh of the settings config.
+`!WriteKeyValue`, then applies it to the running main skin. Appearance changes (font, size, style, colors,
+opacity, width, height, and rotation) use `!SetVariable ... "AlQuranQuote"` (plus `!UpdateMeter`/`!Redraw`
+for appearance) so the verse does NOT refetch. Only Reset uses `!Refresh "AlQuranQuote"`. Width is
+resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed -> clamped `FixedWidth`);
+height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
+it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.
+
+Rotation is decoupled from downloads. `[MeasureQuran]` has `UpdateDivider=-1` (download once on load,
+never on its own timer). `[MeasureRotateTick]` (a `Calc` that counts one per second) forces
+`[!CommandMeasure MeasureQuran "Update"]` every `RotateEvery` seconds while `AutoChange` is 1; both are
+read dynamically, so changing the duration or toggling rotation takes effect immediately with NO refresh
+and NO refetch of the current verse. Do NOT go back to gating rotation through the WebParser's own
+download timer: changing that needs a refresh, which refetches (and toggling rotation must never change
+the displayed verse). Reset restores a `defaults` table in `Settings.lua`. The settings panel is never
+refreshed; its
+previews update in place via `!UpdateMeter`/`!Redraw`, and `loadSettings()`/`resetSettings()` share one
+`seedWorkingState` helper (never read a variable back right after `!SetVariable` in the same call). Because
+the panel reloads its `Initialize` each time it is toggled on, it always opens showing current values. Do
+NOT reintroduce a self-refresh of the settings config.
+
+Main panel layout: the verse starts below the settings icon (`Y = #Pad# + #GearIconHeight# + #IconGap#`)
+so the icon never overlaps the text.
 
 Icons are vector Shapes, not font glyphs: the main panel's open icon is three lines with knobs and the
 panel's close icon is a crossed X. This avoids the mojibake that appears when a `.ini` with non-ASCII

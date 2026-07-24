@@ -10,11 +10,24 @@ RefText=
 ; verse every RotateEvery updates. 1800 = 30 minutes. (Click the panel for the next verse anytime.)
 ; Editable from the settings panel (clamped to at least MinRotateEvery).
 RotateEvery=1800
+; AutoChange toggles automatic rotation on (1) or off (0). Rotation is driven by [MeasureRotateTick] in
+; the main skin (a timer that forces a new download every RotateEvery seconds while AutoChange is 1), not
+; by the WebParser's own download timer, so toggling it never refetches the current verse.
+AutoChange=1
 
 ; ---- Layout ----
+; PanelWidth is the resolved width the skin renders at. When width is "auto" the settings panel sets it to
+; DefaultPanelWidth; when fixed, to the user's FixedWidth. Height is auto (grows to fit) unless HeightAuto
+; is 0, then FixedHeight is used. IconGap is the space below the settings icon before the verse starts.
 PanelWidth=340
+DefaultPanelWidth=340
+WidthAuto=1
+FixedWidth=340
+HeightAuto=1
+FixedHeight=160
 Pad=18
 Radius=14
+IconGap=6
 
 ; ---- Theme ----
 ; QuoteFont, QuoteSize, QuoteStyle, QuoteColor, PanelColorRGB and PanelOpacity are editable from the
@@ -47,3 +60,8 @@ MaxPanelOpacity=255
 ; Rotation bounds, in seconds/updates (60 = one minute, 86400 = one day).
 MinRotateEvery=60
 MaxRotateEvery=86400
+; Fixed width/height bounds, in pixels.
+MinFixedWidth=160
+MaxFixedWidth=1000
+MinFixedHeight=80
+MaxFixedHeight=1000

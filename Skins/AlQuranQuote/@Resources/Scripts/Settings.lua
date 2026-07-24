@@ -5,6 +5,8 @@
 --   2. applies it to the running MAIN skin (via !SetVariable, without a refresh, so the verse does not
 --      refetch), then repaints the panel's previews in place.
 -- The settings panel itself is never refreshed, so editing the skin never disturbs the panel.
+-- Exceptions that DO refresh the main skin: rotation changes (RotateEvery/AutoChange feed the WebParser
+-- UpdateRate, which is only read at load) and Reset.
 
 local mainConfigName = 'AlQuranQuote'
 
@@ -13,6 +15,25 @@ local fontColor = { red = 240, green = 240, blue = 240, alpha = 255 }
 local backgroundColor = { red = 18, green = 22, blue = 28 }
 local fontSize = 13
 local backgroundOpacity = 205
+local autoChange = 1
+local rotateEvery = 1800
+
+-- Canonical defaults for Reset. Mirrors the initial values in the skin's Variables.inc.
+local defaults = {
+	QuoteFont = 'Georgia',
+	QuoteSize = 13,
+	QuoteStyle = 'Italic',
+	QuoteColor = '240,240,240,255',
+	PanelColorRGB = '18,22,28',
+	PanelOpacity = 205,
+	RotateEvery = 1800,
+	AutoChange = 1,
+	WidthAuto = 1,
+	FixedWidth = 340,
+	HeightAuto = 1,
+	FixedHeight = 160,
+	PanelWidth = 340,
+}
 
 function Initialize()
 	loadSettings()
@@ -55,28 +76,27 @@ local function clampRound(value, minimum, maximum)
 	return number
 end
 
+local function readNumber(variableName)
+	return tonumber(SKIN:GetVariable(variableName))
+end
+
 -- Re-evaluate the panel's meters so previews and labels reflect the working variables. No config refresh.
 local function updatePanel()
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end
 
--- Persist a value to the parent Variables.inc and apply it live to the main skin without refetching.
-local function applyAppearance(key, value)
+-- Write one key to the parent Variables.inc (persist only).
+local function persist(key, value)
 	SKIN:Bang('!WriteKeyValue', 'Variables', key, value, variablesFilePath())
+end
+
+-- Persist a value and apply it live to the main skin without refetching a verse.
+local function applyAppearance(key, value)
+	persist(key, value)
 	SKIN:Bang('!SetVariable', key, value, mainConfigName)
 	SKIN:Bang('!UpdateMeter', '*', mainConfigName)
 	SKIN:Bang('!Redraw', mainConfigName)
-end
-
--- Persist a value and fully refresh the main skin (needed when the WebParser UpdateRate changes).
-local function applyWithRefresh(key, value)
-	SKIN:Bang('!WriteKeyValue', 'Variables', key, value, variablesFilePath())
-	SKIN:Bang('!Refresh', mainConfigName)
-end
-
-local function readNumber(variableName)
-	return tonumber(SKIN:GetVariable(variableName))
 end
 
 -- ---- Color helpers ----
@@ -124,45 +144,118 @@ local function highlightStyle(styleKeyword)
 	SKIN:Bang('!SetVariable', 'ItalicColor', italicColor)
 end
 
--- Seed the panel's working variables from the parent config's current values.
-function loadSettings()
-	SKIN:Bang('!SetVariable', 'WorkFontFamily', SKIN:GetVariable('QuoteFont'))
+-- ---- Size / rotation apply helpers ----
 
-	fontSize = clampRound(readNumber('QuoteSize'), readNumber('MinQuoteSize'), readNumber('MaxQuoteSize'))
+-- Resolve the effective panel width (auto -> default; fixed -> clamped) and apply it to the main skin.
+local function resolveAndApplyWidth(widthAuto, fixedWidth)
+	local resolved
+	if widthAuto == 1 then
+		resolved = readNumber('DefaultPanelWidth')
+	else
+		resolved = clampRound(fixedWidth, readNumber('MinFixedWidth'), readNumber('MaxFixedWidth'))
+	end
+	applyAppearance('PanelWidth', resolved)
+end
+
+-- Apply height mode + fixed height to the main skin (the shape formula selects the branch).
+local function applyHeight(heightAuto, fixedHeight)
+	persist('HeightAuto', heightAuto)
+	persist('FixedHeight', fixedHeight)
+	SKIN:Bang('!SetVariable', 'HeightAuto', heightAuto, mainConfigName)
+	SKIN:Bang('!SetVariable', 'FixedHeight', fixedHeight, mainConfigName)
+	SKIN:Bang('!UpdateMeter', '*', mainConfigName)
+	SKIN:Bang('!Redraw', mainConfigName)
+end
+
+-- Persist a value and set it live on the main skin. The main skin's rotation timer reads AutoChange and
+-- RotateEvery dynamically, so this takes effect immediately with no refresh and no refetch of the verse.
+local function applyLiveVariable(key, value)
+	persist(key, value)
+	SKIN:Bang('!SetVariable', key, value, mainConfigName)
+end
+
+-- ---- Seeding (shared by load and reset) ----
+
+-- Push a complete settings state into the panel's working variables and reveal/hide dependent controls.
+local function seedWorkingState(state)
+	fontColor.red = state.fontColor.red
+	fontColor.green = state.fontColor.green
+	fontColor.blue = state.fontColor.blue
+	fontColor.alpha = state.fontColor.alpha
+	backgroundColor.red = state.bgColor.red
+	backgroundColor.green = state.bgColor.green
+	backgroundColor.blue = state.bgColor.blue
+	fontSize = state.fontSizeValue
+	backgroundOpacity = state.opacity
+	autoChange = state.autoChangeValue
+	rotateEvery = state.duration
+
+	SKIN:Bang('!SetVariable', 'WorkFontFamily', state.fontFamily)
 	SKIN:Bang('!SetVariable', 'WorkFontSize', fontSize)
-
-	backgroundOpacity = clampRound(readNumber('PanelOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity'))
+	SKIN:Bang('!SetVariable', 'WorkStyle', state.style)
+	SKIN:Bang('!SetVariable', 'WorkDuration', rotateEvery)
 	SKIN:Bang('!SetVariable', 'WorkOpacity', backgroundOpacity)
-
-	SKIN:Bang('!SetVariable', 'WorkDuration', SKIN:GetVariable('RotateEvery'))
-
-	local currentFontColor = splitNumbers(SKIN:GetVariable('QuoteColor'))
-	fontColor.red = currentFontColor[1] or 240
-	fontColor.green = currentFontColor[2] or 240
-	fontColor.blue = currentFontColor[3] or 240
-	fontColor.alpha = currentFontColor[4] or 255
 	SKIN:Bang('!SetVariable', 'FontColorR', fontColor.red)
 	SKIN:Bang('!SetVariable', 'FontColorG', fontColor.green)
 	SKIN:Bang('!SetVariable', 'FontColorB', fontColor.blue)
 	SKIN:Bang('!SetVariable', 'FontColorA', fontColor.alpha)
-
-	local currentBackgroundColor = splitNumbers(SKIN:GetVariable('PanelColorRGB'))
-	backgroundColor.red = currentBackgroundColor[1] or 18
-	backgroundColor.green = currentBackgroundColor[2] or 22
-	backgroundColor.blue = currentBackgroundColor[3] or 28
 	SKIN:Bang('!SetVariable', 'BgColorR', backgroundColor.red)
 	SKIN:Bang('!SetVariable', 'BgColorG', backgroundColor.green)
 	SKIN:Bang('!SetVariable', 'BgColorB', backgroundColor.blue)
+	SKIN:Bang('!SetVariable', 'WidthAuto', state.widthAuto)
+	SKIN:Bang('!SetVariable', 'FixedWidth', state.fixedWidth)
+	SKIN:Bang('!SetVariable', 'HeightAuto', state.heightAuto)
+	SKIN:Bang('!SetVariable', 'FixedHeight', state.fixedHeight)
+	SKIN:Bang('!SetVariable', 'AutoChange', state.autoChangeValue)
 
-	highlightStyle(SKIN:GetVariable('QuoteStyle'))
+	highlightStyle(state.style)
 
 	SKIN:Bang('!HideMeterGroup', 'FontList')
 	SKIN:Bang('!SetVariable', 'FontListVisible', 0)
+	if state.widthAuto == 1 then
+		SKIN:Bang('!HideMeterGroup', 'WidthInput')
+	else
+		SKIN:Bang('!ShowMeterGroup', 'WidthInput')
+	end
+	if state.heightAuto == 1 then
+		SKIN:Bang('!HideMeterGroup', 'HeightInput')
+	else
+		SKIN:Bang('!ShowMeterGroup', 'HeightInput')
+	end
 
 	updatePanel()
 end
 
--- ---- Font family ----
+-- Seed the panel from the parent config's current values (called on open).
+function loadSettings()
+	local fontColorParts = splitNumbers(SKIN:GetVariable('QuoteColor'))
+	local backgroundColorParts = splitNumbers(SKIN:GetVariable('PanelColorRGB'))
+	seedWorkingState({
+		fontFamily = SKIN:GetVariable('QuoteFont'),
+		fontSizeValue = clampRound(readNumber('QuoteSize'), readNumber('MinQuoteSize'), readNumber('MaxQuoteSize')),
+		style = SKIN:GetVariable('QuoteStyle'),
+		duration = readNumber('RotateEvery'),
+		opacity = clampRound(readNumber('PanelOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
+		fontColor = {
+			red = fontColorParts[1] or 240,
+			green = fontColorParts[2] or 240,
+			blue = fontColorParts[3] or 240,
+			alpha = fontColorParts[4] or 255,
+		},
+		bgColor = {
+			red = backgroundColorParts[1] or 18,
+			green = backgroundColorParts[2] or 22,
+			blue = backgroundColorParts[3] or 28,
+		},
+		widthAuto = tonumber(SKIN:GetVariable('WidthAuto')) or 1,
+		fixedWidth = readNumber('FixedWidth') or 340,
+		heightAuto = tonumber(SKIN:GetVariable('HeightAuto')) or 1,
+		fixedHeight = readNumber('FixedHeight') or 160,
+		autoChangeValue = tonumber(SKIN:GetVariable('AutoChange')) or 1,
+	})
+end
+
+-- ---- Font family (list + manual) ----
 
 function toggleFontList()
 	local visible = tonumber(SKIN:GetVariable('FontListVisible'))
@@ -242,7 +335,22 @@ function nudgeFontColorChannel(component, step)
 	applyFontColor()
 end
 
--- ---- Background color channels ----
+-- Manual font color entry: "R,G,B" or "R,G,B,A". Alpha is kept unchanged if not supplied.
+function setFontColorManual(text)
+	local parts = splitNumbers(text)
+	if #parts < 3 then
+		return
+	end
+	fontColor.red = clampRound(parts[1], 0, 255)
+	fontColor.green = clampRound(parts[2], 0, 255)
+	fontColor.blue = clampRound(parts[3], 0, 255)
+	if parts[4] ~= nil then
+		fontColor.alpha = clampRound(parts[4], 0, 255)
+	end
+	applyFontColor()
+end
+
+-- ---- Background color channels (sliders) + manual R,G,B entry ----
 
 function setBackgroundColorChannel(component, percent)
 	local value = channelFromPercent(percent)
@@ -267,7 +375,18 @@ function nudgeBackgroundColorChannel(component, step)
 	applyBackgroundColor()
 end
 
--- ---- Background opacity (range) ----
+function setBackgroundColorManual(text)
+	local parts = splitNumbers(text)
+	if #parts < 3 then
+		return
+	end
+	backgroundColor.red = clampRound(parts[1], 0, 255)
+	backgroundColor.green = clampRound(parts[2], 0, 255)
+	backgroundColor.blue = clampRound(parts[3], 0, 255)
+	applyBackgroundColor()
+end
+
+-- ---- Background opacity (range) + manual entry ----
 
 function setOpacityPercent(percent)
 	local minimum = readNumber('MinPanelOpacity')
@@ -287,17 +406,127 @@ function nudgeOpacity(step)
 	updatePanel()
 end
 
--- ---- Quote change duration (typed) ----
+function setOpacityValue(value)
+	local number = tonumber(value)
+	if number == nil then
+		return
+	end
+	backgroundOpacity = clampRound(number, readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity'))
+	SKIN:Bang('!SetVariable', 'WorkOpacity', backgroundOpacity)
+	applyAppearance('PanelOpacity', backgroundOpacity)
+	updatePanel()
+end
+
+-- ---- Panel width (auto / fixed) ----
+
+function toggleWidthAuto()
+	local widthAuto = tonumber(SKIN:GetVariable('WidthAuto'))
+	if widthAuto == 1 then
+		widthAuto = 0
+	else
+		widthAuto = 1
+	end
+	SKIN:Bang('!SetVariable', 'WidthAuto', widthAuto)
+	persist('WidthAuto', widthAuto)
+	if widthAuto == 1 then
+		SKIN:Bang('!HideMeterGroup', 'WidthInput')
+	else
+		SKIN:Bang('!ShowMeterGroup', 'WidthInput')
+	end
+	resolveAndApplyWidth(widthAuto, readNumber('FixedWidth'))
+	updatePanel()
+end
+
+function setFixedWidth(value)
+	local number = clampRound(value, readNumber('MinFixedWidth'), readNumber('MaxFixedWidth'))
+	SKIN:Bang('!SetVariable', 'FixedWidth', number)
+	persist('FixedWidth', number)
+	resolveAndApplyWidth(tonumber(SKIN:GetVariable('WidthAuto')), number)
+	updatePanel()
+end
+
+-- ---- Panel height (auto / fixed) ----
+
+function toggleHeightAuto()
+	local heightAuto = tonumber(SKIN:GetVariable('HeightAuto'))
+	if heightAuto == 1 then
+		heightAuto = 0
+	else
+		heightAuto = 1
+	end
+	SKIN:Bang('!SetVariable', 'HeightAuto', heightAuto)
+	if heightAuto == 1 then
+		SKIN:Bang('!HideMeterGroup', 'HeightInput')
+	else
+		SKIN:Bang('!ShowMeterGroup', 'HeightInput')
+	end
+	applyHeight(heightAuto, readNumber('FixedHeight'))
+	updatePanel()
+end
+
+function setFixedHeight(value)
+	local number = clampRound(value, readNumber('MinFixedHeight'), readNumber('MaxFixedHeight'))
+	SKIN:Bang('!SetVariable', 'FixedHeight', number)
+	applyHeight(tonumber(SKIN:GetVariable('HeightAuto')), number)
+	updatePanel()
+end
+
+-- ---- Automatic rotation + duration ----
+
+function toggleAutoChange()
+	if autoChange == 1 then
+		autoChange = 0
+	else
+		autoChange = 1
+	end
+	-- Update the panel's own checkbox variable, then apply live to the main skin (no refetch).
+	SKIN:Bang('!SetVariable', 'AutoChange', autoChange)
+	applyLiveVariable('AutoChange', autoChange)
+	updatePanel()
+end
 
 function setDuration(value)
 	local number = tonumber(value)
 	if number == nil then
 		return
 	end
-	local minimum = readNumber('MinRotateEvery')
-	local maximum = readNumber('MaxRotateEvery')
-	number = clampRound(number, minimum, maximum)
-	SKIN:Bang('!SetVariable', 'WorkDuration', number)
-	applyWithRefresh('RotateEvery', number)
+	rotateEvery = clampRound(number, readNumber('MinRotateEvery'), readNumber('MaxRotateEvery'))
+	SKIN:Bang('!SetVariable', 'WorkDuration', rotateEvery)
+	applyLiveVariable('RotateEvery', rotateEvery)
 	updatePanel()
+end
+
+-- ---- Reset ----
+
+function resetSettings()
+	for key, value in pairs(defaults) do
+		persist(key, value)
+	end
+	SKIN:Bang('!Refresh', mainConfigName)
+
+	local fontColorParts = splitNumbers(defaults.QuoteColor)
+	local backgroundColorParts = splitNumbers(defaults.PanelColorRGB)
+	seedWorkingState({
+		fontFamily = defaults.QuoteFont,
+		fontSizeValue = defaults.QuoteSize,
+		style = defaults.QuoteStyle,
+		duration = defaults.RotateEvery,
+		opacity = defaults.PanelOpacity,
+		fontColor = {
+			red = fontColorParts[1],
+			green = fontColorParts[2],
+			blue = fontColorParts[3],
+			alpha = fontColorParts[4],
+		},
+		bgColor = {
+			red = backgroundColorParts[1],
+			green = backgroundColorParts[2],
+			blue = backgroundColorParts[3],
+		},
+		widthAuto = defaults.WidthAuto,
+		fixedWidth = defaults.FixedWidth,
+		heightAuto = defaults.HeightAuto,
+		fixedHeight = defaults.FixedHeight,
+		autoChangeValue = defaults.AutoChange,
+	})
 end

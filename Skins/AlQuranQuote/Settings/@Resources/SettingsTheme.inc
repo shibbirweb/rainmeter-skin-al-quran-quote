@@ -6,7 +6,7 @@
 
 ; ---- Panel look ----
 SettingsWidth=300
-SettingsHeight=496
+SettingsHeight=824
 Pad=16
 Radius=12
 SettingsBg=24,28,34,245
@@ -42,21 +42,38 @@ NegOpacityStep=-5
 
 ; ---- Layout metrics ----
 LabelH=18
+RowH=20
 ChannelH=20
+InputH=18
+ContentW=268
 StyleButtonWidth=56
 CloseBoxSize=10
 PreviewX=210
 PreviewW=74
 PreviewH=16
 
-; ---- Block base-Y positions (top of each setting block) ----
+; ---- Checkboxes and reset button ----
+CheckboxSize=14
+CheckboxTextX=38
+CheckboxColor=175,182,193,255
+CheckboxCheckRGB=120,200,255
+ResetButtonW=268
+ResetButtonH=26
+ResetButtonBg=60,66,76,255
+ResetButtonColor=235,235,235,255
+
+; ---- Block base-Y positions (top of each setting block; stacked top to bottom) ----
 FamilyBaseY=44
-SizeBaseY=94
-StyleBaseY=142
-FontColorBaseY=190
-BgColorBaseY=302
-OpacityBaseY=394
-DurationBaseY=442
+SizeBaseY=116
+StyleBaseY=166
+FontColorBaseY=216
+BgColorBaseY=348
+OpacityBaseY=458
+WidthBaseY=530
+HeightBaseY=602
+RotateToggleBaseY=674
+DurationBaseY=724
+ResetBaseY=774
 
 ; ---- Curated font list ----
 FontListTop=82
