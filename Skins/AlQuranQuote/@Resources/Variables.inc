@@ -3,11 +3,28 @@
 
 ; ---- Content (set at runtime by the Lua script; leave as-is) ----
 QuoteText=Loading verse...
-; VerseKey is the chapter:verse (for example 6:124), set at runtime. The reference is composed in the meter
-; as "#ReferenceLabel# #VerseKey#", so changing the label updates the shown reference live.
+; VerseKey is the chapter:verse (for example 6:124), set at runtime (fetched, or the manual custom key).
 VerseKey=
+; RefText is the fully composed reference line the meter shows. The Lua composes it from ReferenceLabel,
+; VerseKey and the show toggles below, so the label can be hidden, the number can be hidden, and there is
+; no trailing space when only one is shown (a lone label stays centered). Set at runtime; leave as-is.
+RefText=
 ; The label shown before the verse key (editable from the settings panel).
 ReferenceLabel=Al Quran
+; ShowReferenceLabel / ShowVerseNumber toggle the two parts of the reference line (1 shows, 0 hides). They
+; apply to both fetched verses and the custom verse. Editable from the settings panel.
+ShowReferenceLabel=1
+ShowVerseNumber=1
+
+; ---- Custom verse (a user-provided verse shown instead of the fetched one) ----
+; When CustomVerseEnabled is 1 the skin shows CustomText with the manual SuraNumber:VerseNumberManual as
+; the reference, and does NOT fetch or rotate (the next-verse control is hidden). When 0, normal API
+; verses show. SuraNumber and VerseNumberManual are nullable: if either is empty the reference shows no
+; number (just the label, centered). All editable from the settings panel.
+CustomVerseEnabled=0
+CustomText=
+SuraNumber=
+VerseNumberManual=
 
 ; ---- Rotation ----
 ; The skin updates once per second (see [Rainmeter] Update=1000). [MeasureRotateTick] counts those

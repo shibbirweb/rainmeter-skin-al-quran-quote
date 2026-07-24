@@ -48,14 +48,29 @@ Data flow:
    translation (HTML tags stripped via `RegExpSubstitute`).
 3. On success `FinishAction` calls `Online()`, which reads the child measures and calls
    `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows a random
-   line from `quotes.txt` (the verse key is extracted from the bundled reference with `%d+:%d+`).
-4. `applyVerse` sets `#QuoteText#` and `#VerseKey#`. The quote meter shows `#QuoteText#`; the reference
-   meter is composed as `#ReferenceLabel# #VerseKey#`, so the editable label (default "Al Quran") updates
-   the shown reference live without refetching.
+   line from `quotes.txt` (the verse key is extracted from the bundled reference with `%d+:%d+`). When
+   `#CustomVerseEnabled#` is 1, both route to `applyCustomVerse()` instead (see custom-verse note below).
+4. `applyVerse` sets `#QuoteText#` and `#VerseKey#`, then composes `#RefText#` (in `Verse.lua`'s
+   `composeReferenceText`) from the label, the key and the two show toggles. The quote meter shows
+   `#QuoteText#`; the reference meter shows `#RefText#`. Composing in Lua (not `#ReferenceLabel# #VerseKey#`
+   in the meter) lets either part be hidden and drops the trailing space so a lone label stays centered.
+   The settings panel changes the label/toggles/custom fields and then calls `refreshDisplay()` on the
+   main skin (via cross-config `!CommandMeasure`), which recomposes without refetching.
 
 Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent. WebParser downloads
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
 never settles, so `FinishAction` never fires and the skin stays on "Loading verse...".
+
+Custom verse: when `#CustomVerseEnabled#` is 1 the skin shows the user's `#CustomText#` with the manual
+`#SuraNumber#:#VerseNumberManual#` as the reference key, instead of fetching. Both numbers are nullable: if
+either is empty the key is empty and the reference shows just the label (centered). `RandomAyah.lua`'s
+`Online`/`Offline`/`refreshDisplay` route to `applyCustomVerse()` in this mode, the rotation tick is gated
+off (`&& (#CustomVerseEnabled# = 0)`), and the next-verse control is hidden (`Hidden=#CustomVerseEnabled#`),
+so a stray download can never overwrite the custom verse. Toggling the mode off issues a `CommandMeasure
+MeasureQuran "Update"` to fetch a fresh verse. `#ShowReferenceLabel#` and `#ShowVerseNumber#` toggle the two
+parts of the reference line and apply in both modes. The three text inputs (custom text, sura, verse) write
+`$UserInput$` into a working variable and then call a `commit*` Lua function that reads it back, so an
+apostrophe in the text cannot break the command (double quotes still can, a Rainmeter InputText limit).
 
 Gotcha: `[MeasureQuran]` sets `ProxyServer=/none`. WebParser defaults to the system/IE proxy config, so on
 a machine with proxy auto-detection (WPAD) enabled the download can hang indefinitely: the log shows
@@ -77,20 +92,37 @@ Keeping the panel's look in its own file is deliberate: editing the skin never r
 Controls: a click-to-open curated font list (plus a manual "type a font name" input), sliders for font
 size and for each color channel (font color R/G/B/A, background R/G/B), a range slider for background
 opacity (plus manual inputs for font color R,G,B,A, background R,G,B, and opacity), a border-opacity slider,
-three buttons for font style, an editable reference label, a typed rotation duration, "auto" checkboxes for
-width and height (each revealing a fixed-value input when unchecked), an automatic-rotation checkbox, a
-show-settings-icon checkbox, and a Reset button. Sliders are Shape meters (track + fill); click sets the value from
+three buttons for font style, an editable reference label, show/hide checkboxes for the reference label and
+the verse number, a "use custom verse" checkbox with a custom-text input and optional sura/verse number
+inputs, a typed rotation duration, "auto" checkboxes for width and height (each revealing a fixed-value
+input when unchecked), an automatic-rotation checkbox, a show-settings-icon checkbox, and a Reset button.
+Sliders are Shape meters (track + fill); click sets the value from
 `$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step.
 Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
 near-transparent fill so the whole box is clickable. Reveal-on-uncheck inputs use the `WidthInput` /
 `HeightInput` groups shown/hidden from Lua. Live state lives in settings-owned working variables
 (`WorkFontSize`, `FontColorR..A`, `BgColorR..B`, `WorkOpacity`, `WorkFontFamily`, `WorkDuration`,
-`WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`) that `Settings.lua` seeds on open.
+`WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`, `WorkCustomText`, `WorkSuraNumber`,
+`WorkVerseNumber`) plus the shared toggles `ShowReferenceLabel`/`ShowVerseNumber`/`CustomVerseEnabled`,
+that `Settings.lua` seeds on open. The panel is split into three tabs (Text / Panel / Verse) so it stays
+short; each content meter is in a `Tab1`/`Tab2`/`Tab3` group (multiple groups joined with `|`, e.g.
+`Group=Live | Tab1`), `setTab(n)` hides the other two groups and shows the active one, and Tab2/Tab3 meters
+start `Hidden=1` so only Tab1 shows on open. The font-list overlay and the reveal-on-uncheck width/height
+inputs are NOT in a Tab group; `setTab` hides them explicitly (and re-shows width/height on the Panel tab
+only when their auto box is unchecked) so they never appear on the wrong tab. Within a tab the controls sit
+in two columns: the left column (X=`Pad`) holds the slider-based controls, whose X positions are
+width-relative, and the right column (X=`Col2X`) holds the flat controls (labels, inputs, checkboxes,
+style buttons). Each column is an independent stack of base-Y values in `SettingsTheme.inc` starting from
+`ContentTopY`; adding a control means recomputing the base-Y of the ones below it in the same column and,
+if it grows the tallest column across all tabs, `ResetBaseY` and `SettingsHeight`.
 
 Apply path (in `Settings.lua`): on any change it writes the value to the parent `Variables.inc` with
 `!WriteKeyValue`, then applies it to the running main skin. Appearance changes (font, size, style, colors,
 opacity, width, height, and rotation) use `!SetVariable ... "AlQuranQuote"` (plus `!UpdateMeter`/`!Redraw`
-for appearance) so the verse does NOT refetch. Only Reset uses `!Refresh "AlQuranQuote"`. Width is
+for appearance) so the verse does NOT refetch. Reference/custom changes (label, show toggles, custom text,
+sura/verse) use `applyMainRefresh`, which sets the variable on the main skin and then calls
+`refreshDisplay()` there to recompose `#RefText#` (and re-apply the custom verse) without refetching. Only
+Reset uses `!Refresh "AlQuranQuote"`. Width is
 resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed -> clamped `FixedWidth`);
 height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
 it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.

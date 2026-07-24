@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The settings panel is now split into three tabs (Text / Panel / Verse), each laid out in two columns, so
+  it fits on screen instead of being one very tall column.
+- Custom verse: a "use custom verse" checkbox in the settings panel shows your own text with an optional
+  manual sura and verse number instead of a fetched verse. While it is on, rotation and fetching pause and
+  the next-verse control is hidden, so the custom verse is never overwritten; turning it off fetches a
+  fresh verse again. The sura and verse numbers are optional (nullable): if either is empty the reference
+  shows just the label, centered.
+- Show/hide checkboxes for the reference label and the verse number, applied to both fetched and custom
+  verses. The reference line is now composed in Lua so a hidden part leaves no gap and a lone label stays
+  centered.
+
 - Settings panel (icon on the main panel) to change the verse appearance and rotation without hand-editing
   files. Changes save to `Variables.inc` and apply immediately. Controls:
   - Font family from a curated, clickable list.

@@ -39,6 +39,12 @@ local defaults = {
 	HeightAuto = 1,
 	FixedHeight = 160,
 	PanelWidth = 340,
+	ShowReferenceLabel = 1,
+	ShowVerseNumber = 1,
+	CustomVerseEnabled = 0,
+	CustomText = '',
+	SuraNumber = '',
+	VerseNumberManual = '',
 }
 
 function Initialize()
@@ -105,6 +111,30 @@ local function applyAppearance(key, value)
 	SKIN:Bang('!Redraw', mainConfigName)
 end
 
+-- Persist a reference/custom value and ask the main skin to recompose its display (label, verse key and
+-- custom verse are composed in the main skin's Lua). refreshDisplay recomposes without refetching.
+local function applyMainRefresh(key, value)
+	persist(key, value)
+	SKIN:Bang('!SetVariable', key, value, mainConfigName)
+	SKIN:Bang('!CommandMeasure', 'MeasureRandom', 'refreshDisplay()', mainConfigName)
+end
+
+-- Normalize a manual number field: keep it empty (nullable) or return the integer as text.
+local function cleanNumberOrEmpty(value)
+	if value == nil then
+		return ''
+	end
+	local text = tostring(value)
+	if text == '' then
+		return ''
+	end
+	local number = tonumber(text)
+	if number == nil then
+		return ''
+	end
+	return tostring(math.floor(number))
+end
+
 -- ---- Color helpers ----
 
 local function applyFontColor()
@@ -148,6 +178,55 @@ local function highlightStyle(styleKeyword)
 	SKIN:Bang('!SetVariable', 'BoldColor', boldColor)
 	SKIN:Bang('!SetVariable', 'RegularColor', regularColor)
 	SKIN:Bang('!SetVariable', 'ItalicColor', italicColor)
+end
+
+-- Color the active tab label and dim the others.
+local function highlightTab(tabNumber)
+	local inactive = SKIN:GetVariable('SettingsInactiveColor')
+	local active = SKIN:GetVariable('SettingsActiveColor')
+	local color1 = inactive
+	local color2 = inactive
+	local color3 = inactive
+	if tabNumber == 1 then
+		color1 = active
+	elseif tabNumber == 2 then
+		color2 = active
+	else
+		color3 = active
+	end
+	SKIN:Bang('!SetVariable', 'Tab1Color', color1)
+	SKIN:Bang('!SetVariable', 'Tab2Color', color2)
+	SKIN:Bang('!SetVariable', 'Tab3Color', color3)
+end
+
+-- Show one tab's meters and hide the others. The font-list overlay and the reveal-on-uncheck width/height
+-- inputs are hidden here too (they are not in a Tab group) so they never show on the wrong tab; on the
+-- Panel tab the width/height inputs reappear only when their "auto" box is unchecked. Global so the tab
+-- buttons in Settings.ini can call it.
+function setTab(tabNumber)
+	SKIN:Bang('!SetVariable', 'ActiveTab', tabNumber)
+	SKIN:Bang('!HideMeterGroup', 'Tab1')
+	SKIN:Bang('!HideMeterGroup', 'Tab2')
+	SKIN:Bang('!HideMeterGroup', 'Tab3')
+	SKIN:Bang('!HideMeterGroup', 'FontList')
+	SKIN:Bang('!SetVariable', 'FontListVisible', 0)
+	SKIN:Bang('!HideMeterGroup', 'WidthInput')
+	SKIN:Bang('!HideMeterGroup', 'HeightInput')
+	if tabNumber == 1 then
+		SKIN:Bang('!ShowMeterGroup', 'Tab1')
+	elseif tabNumber == 2 then
+		SKIN:Bang('!ShowMeterGroup', 'Tab2')
+		if tonumber(SKIN:GetVariable('WidthAuto')) == 0 then
+			SKIN:Bang('!ShowMeterGroup', 'WidthInput')
+		end
+		if tonumber(SKIN:GetVariable('HeightAuto')) == 0 then
+			SKIN:Bang('!ShowMeterGroup', 'HeightInput')
+		end
+	else
+		SKIN:Bang('!ShowMeterGroup', 'Tab3')
+	end
+	highlightTab(tabNumber)
+	SKIN:Bang('!Redraw')
 end
 
 -- ---- Size / rotation apply helpers ----
@@ -220,6 +299,12 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'HeightAuto', state.heightAuto)
 	SKIN:Bang('!SetVariable', 'FixedHeight', state.fixedHeight)
 	SKIN:Bang('!SetVariable', 'AutoChange', state.autoChangeValue)
+	SKIN:Bang('!SetVariable', 'ShowReferenceLabel', state.showReferenceLabel)
+	SKIN:Bang('!SetVariable', 'ShowVerseNumber', state.showVerseNumber)
+	SKIN:Bang('!SetVariable', 'CustomVerseEnabled', state.customVerseEnabled)
+	SKIN:Bang('!SetVariable', 'WorkCustomText', state.customText)
+	SKIN:Bang('!SetVariable', 'WorkSuraNumber', state.suraNumber)
+	SKIN:Bang('!SetVariable', 'WorkVerseNumber', state.verseNumber)
 
 	highlightStyle(state.style)
 
@@ -268,7 +353,14 @@ function loadSettings()
 		heightAuto = tonumber(SKIN:GetVariable('HeightAuto')) or 1,
 		fixedHeight = readNumber('FixedHeight') or 160,
 		autoChangeValue = tonumber(SKIN:GetVariable('AutoChange')) or 1,
+		showReferenceLabel = tonumber(SKIN:GetVariable('ShowReferenceLabel')) or 1,
+		showVerseNumber = tonumber(SKIN:GetVariable('ShowVerseNumber')) or 1,
+		customVerseEnabled = tonumber(SKIN:GetVariable('CustomVerseEnabled')) or 0,
+		customText = SKIN:GetVariable('CustomText'),
+		suraNumber = SKIN:GetVariable('SuraNumber'),
+		verseNumber = SKIN:GetVariable('VerseNumberManual'),
 	})
+	setTab(1)
 end
 
 -- ---- Font family (list + manual) ----
@@ -516,7 +608,78 @@ end
 
 function setReferenceLabel(text)
 	SKIN:Bang('!SetVariable', 'WorkReferenceLabel', text)
-	applyAppearance('ReferenceLabel', text)
+	applyMainRefresh('ReferenceLabel', text)
+	updatePanel()
+end
+
+-- ---- Reference visibility toggles (apply to fetched and custom verses) ----
+
+function toggleShowReferenceLabel()
+	local show = tonumber(SKIN:GetVariable('ShowReferenceLabel'))
+	if show == 1 then
+		show = 0
+	else
+		show = 1
+	end
+	SKIN:Bang('!SetVariable', 'ShowReferenceLabel', show)
+	applyMainRefresh('ShowReferenceLabel', show)
+	updatePanel()
+end
+
+function toggleShowVerseNumber()
+	local show = tonumber(SKIN:GetVariable('ShowVerseNumber'))
+	if show == 1 then
+		show = 0
+	else
+		show = 1
+	end
+	SKIN:Bang('!SetVariable', 'ShowVerseNumber', show)
+	applyMainRefresh('ShowVerseNumber', show)
+	updatePanel()
+end
+
+-- ---- Custom verse (text + manual sura/verse) ----
+
+-- Toggle custom-verse mode. Turning it on shows the custom verse immediately; turning it off fetches a
+-- fresh API verse (the tick and the next-verse control read CustomVerseEnabled dynamically).
+function toggleCustomVerse()
+	local enabled = tonumber(SKIN:GetVariable('CustomVerseEnabled'))
+	if enabled == 1 then
+		enabled = 0
+	else
+		enabled = 1
+	end
+	SKIN:Bang('!SetVariable', 'CustomVerseEnabled', enabled)
+	persist('CustomVerseEnabled', enabled)
+	SKIN:Bang('!SetVariable', 'CustomVerseEnabled', enabled, mainConfigName)
+	if enabled == 1 then
+		SKIN:Bang('!CommandMeasure', 'MeasureRandom', 'refreshDisplay()', mainConfigName)
+	else
+		SKIN:Bang('!CommandMeasure', 'MeasureQuran', 'Update', mainConfigName)
+		SKIN:Bang('!UpdateMeasure', 'MeasureQuran', mainConfigName)
+	end
+	updatePanel()
+end
+
+-- The three inputs write their typed value to a working variable first (so an apostrophe cannot break the
+-- command), then call these to read it back and apply. The number fields are nullable.
+function commitCustomText()
+	local text = SKIN:GetVariable('WorkCustomText')
+	applyMainRefresh('CustomText', text)
+	updatePanel()
+end
+
+function commitSuraNumber()
+	local cleaned = cleanNumberOrEmpty(SKIN:GetVariable('WorkSuraNumber'))
+	SKIN:Bang('!SetVariable', 'WorkSuraNumber', cleaned)
+	applyMainRefresh('SuraNumber', cleaned)
+	updatePanel()
+end
+
+function commitVerseNumber()
+	local cleaned = cleanNumberOrEmpty(SKIN:GetVariable('WorkVerseNumber'))
+	SKIN:Bang('!SetVariable', 'WorkVerseNumber', cleaned)
+	applyMainRefresh('VerseNumberManual', cleaned)
 	updatePanel()
 end
 
@@ -600,5 +763,12 @@ function resetSettings()
 		heightAuto = defaults.HeightAuto,
 		fixedHeight = defaults.FixedHeight,
 		autoChangeValue = defaults.AutoChange,
+		showReferenceLabel = defaults.ShowReferenceLabel,
+		showVerseNumber = defaults.ShowVerseNumber,
+		customVerseEnabled = defaults.CustomVerseEnabled,
+		customText = defaults.CustomText,
+		suraNumber = defaults.SuraNumber,
+		verseNumber = defaults.VerseNumberManual,
 	})
+	setTab(1)
 end
