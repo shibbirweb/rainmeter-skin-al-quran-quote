@@ -40,10 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The verse font style is now driven by a `QuoteStyle` variable (was a hardcoded `StringStyle=Italic`);
   the default font style is now Regular.
 - The verse no longer changes when the quote window is clicked; use the next-verse control instead.
-- Settings changes apply to the running skin without refetching a new verse (only Reset refreshes the
-  skin); the settings panel no longer refreshes itself when a value changes.
-- Verse rotation is driven by a timer decoupled from the download, so toggling automatic rotation or
-  changing the duration no longer refetches (changes) the current verse.
+- Appearance changes (font, colors, size, opacity, width, height, reference label, icon visibility) apply
+  to the running skin without refetching a new verse; the settings panel never refreshes itself. Rotation
+  changes (auto-rotation on/off, duration) and Reset refresh the main skin, which fetches a new verse.
 - The open (main panel) and close (settings panel) controls are drawn as vector shapes instead of font
   glyphs, so they always render correctly regardless of file encoding.
 

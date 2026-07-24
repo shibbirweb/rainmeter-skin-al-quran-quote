@@ -40,10 +40,9 @@ Data flow:
 1. `[MeasureQuran]` (WebParser) fetches
    `https://api.quran.com/api/v4/verses/random?language=en&translations=20`
    (translation resource 20 = Saheeh International). `verses/random` returns a new verse on every real
-   download, so no cache-buster is needed. The parent's own download timer is disabled with a very large
-   `UpdateRate=#WebParserIdleRate#`; the verse is (re)fetched only by forced `[!CommandMeasure MeasureQuran
-   "Update"]` calls, from `OnRefreshAction` (initial load), `[MeasureRotateTick]` (rotation), and the
-   next-verse icon. See the rotation note below.
+   download, so no cache-buster is needed. `UpdateRate=#EffectiveRate#` re-downloads on a timer (rotation);
+   clicking the next-verse icon runs `[!CommandMeasure MeasureQuran "Update"]` to fetch immediately. See
+   the rotation note below.
 2. Child measures extract fields via `StringIndex` from the regex
    `(?siU)"verse_key":"(.*)".*"text":"(.*)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
    translation (HTML tags stripped via `RegExpSubstitute`).
@@ -87,16 +86,17 @@ resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed 
 height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
 it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.
 
-Rotation is decoupled from downloads. `[MeasureQuran]` keeps updating every cycle (default UpdateDivider)
-so completed downloads are processed and `FinishAction` fires, but its own download timer is disabled with
-a very large `UpdateRate=#WebParserIdleRate#`. The first verse is fetched by `OnRefreshAction` on load.
-`[MeasureRotateTick]` (a `Calc` that counts one per second) forces `[!CommandMeasure MeasureQuran "Update"]`
-every `RotateEvery` seconds while `AutoChange` is 1; both are read dynamically, so changing the duration or
-toggling rotation takes effect immediately with NO refresh and NO refetch of the current verse. Do NOT set
-`UpdateDivider=-1` on the WebParser: it stops the measure updating, so a forced download never gets
-processed (no new verse). And do NOT gate rotation through the WebParser's own download timer: changing
-that needs a refresh, which refetches (and toggling rotation must never change the displayed verse). Reset restores a `defaults` table in `Settings.lua`. The settings panel is never
-refreshed; its
+Rotation uses the WebParser's own `UpdateRate=#EffectiveRate#`, where `EffectiveRate = AutoChange *
+RotateEvery` (0 pauses rotation). The WebParser downloads on load (so the first verse appears) and then
+every `EffectiveRate` seconds. `Settings.lua`'s `applyRotation` recomputes `EffectiveRate` on an AutoChange
+or duration change, persists it, and `!Refresh`es the main skin so the WebParser picks up the new rate.
+Note: because `UpdateRate` is only read at (re)load and the WebParser parent must NOT carry
+`DynamicVariables` (see the gotcha above), changing rotation requires a refresh, which re-downloads a verse.
+This was deliberately chosen over a decoupled timer approach (a `Calc` firing `[!CommandMeasure MeasureQuran
+"Update"]` with `UpdateRate=0`/huge): on this skin, forced `Update` calls with a 0/huge `UpdateRate` did not
+reliably fetch, leaving the skin stuck on "Loading verse...". Do NOT set `UpdateDivider=-1` on the WebParser
+either: it stops the measure updating, so a completed download never gets processed. Reset restores a
+`defaults` table in `Settings.lua`. The settings panel is never refreshed; its
 previews update in place via `!UpdateMeter`/`!Redraw`, and `loadSettings()`/`resetSettings()` share one
 `seedWorkingState` helper (never read a variable back right after `!SetVariable` in the same call). Because
 the panel reloads its `Initialize` each time it is toggled on, it always opens showing current values. Do

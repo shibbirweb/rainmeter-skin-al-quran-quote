@@ -172,11 +172,15 @@ local function applyHeight(heightAuto, fixedHeight)
 	SKIN:Bang('!Redraw', mainConfigName)
 end
 
--- Persist a value and set it live on the main skin. The main skin's rotation timer reads AutoChange and
--- RotateEvery dynamically, so this takes effect immediately with no refresh and no refetch of the verse.
-local function applyLiveVariable(key, value)
-	persist(key, value)
-	SKIN:Bang('!SetVariable', key, value, mainConfigName)
+-- Recompute EffectiveRate (AutoChange * RotateEvery; 0 pauses rotation), persist it, and refresh the main
+-- skin so the WebParser picks up the new UpdateRate. A refresh re-downloads a verse; this is the reliable
+-- Rainmeter way to change the WebParser's download timer.
+local function applyRotation()
+	local effective = autoChange * rotateEvery
+	persist('AutoChange', autoChange)
+	persist('RotateEvery', rotateEvery)
+	persist('EffectiveRate', effective)
+	SKIN:Bang('!Refresh', mainConfigName)
 end
 
 -- ---- Seeding (shared by load and reset) ----
@@ -491,9 +495,9 @@ function toggleAutoChange()
 	else
 		autoChange = 1
 	end
-	-- Update the panel's own checkbox variable, then apply live to the main skin (no refetch).
+	-- Update the panel's own checkbox variable, then apply the new rotation rate to the main skin.
 	SKIN:Bang('!SetVariable', 'AutoChange', autoChange)
-	applyLiveVariable('AutoChange', autoChange)
+	applyRotation()
 	updatePanel()
 end
 
@@ -504,7 +508,7 @@ function setDuration(value)
 	end
 	rotateEvery = clampRound(number, readNumber('MinRotateEvery'), readNumber('MaxRotateEvery'))
 	SKIN:Bang('!SetVariable', 'WorkDuration', rotateEvery)
-	applyLiveVariable('RotateEvery', rotateEvery)
+	applyRotation()
 	updatePanel()
 end
 
@@ -557,9 +561,7 @@ function toggleShowIcon()
 		hidden = 1
 	end
 	SKIN:Bang('!SetVariable', 'SettingsIconHidden', hidden)
-	applyLiveVariable('SettingsIconHidden', hidden)
-	SKIN:Bang('!UpdateMeter', 'MeterSettingsGear', mainConfigName)
-	SKIN:Bang('!Redraw', mainConfigName)
+	applyAppearance('SettingsIconHidden', hidden)
 	updatePanel()
 end
 
@@ -569,6 +571,7 @@ function resetSettings()
 	for key, value in pairs(defaults) do
 		persist(key, value)
 	end
+	persist('EffectiveRate', defaults.AutoChange * defaults.RotateEvery)
 	SKIN:Bang('!Refresh', mainConfigName)
 
 	local fontColorParts = splitNumbers(defaults.QuoteColor)

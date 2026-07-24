@@ -14,13 +14,11 @@ ReferenceLabel=Al Quran
 ; verse every RotateEvery updates. 1800 = 30 minutes. (Click the panel for the next verse anytime.)
 ; Editable from the settings panel (clamped to at least MinRotateEvery).
 RotateEvery=1800
-; AutoChange toggles automatic rotation on (1) or off (0). Rotation is driven by [MeasureRotateTick] in
-; the main skin (a timer that forces a new download every RotateEvery seconds while AutoChange is 1), not
-; by the WebParser's own download timer, so toggling it never refetches the current verse.
+; AutoChange toggles automatic rotation on (1) or off (0). It feeds EffectiveRate below.
 AutoChange=1
-; A very large WebParser UpdateRate so the parent never auto-downloads on its own; rotation is driven by
-; [MeasureRotateTick] and the next-verse icon forcing an Update instead. (About 31 years at one per second.)
-WebParserIdleRate=1000000000
+; EffectiveRate feeds the WebParser UpdateRate: AutoChange * RotateEvery (0 pauses rotation). The settings
+; panel keeps it in sync and refreshes the skin so the WebParser picks up the new rate. Do not hand-edit.
+EffectiveRate=1800
 
 ; ---- Layout ----
 ; PanelWidth is the resolved width the skin renders at. When width is "auto" the settings panel sets it to
