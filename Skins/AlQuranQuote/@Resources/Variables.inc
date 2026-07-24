@@ -10,15 +10,19 @@ VerseKey=
 ReferenceLabel=Al Quran
 
 ; ---- Rotation ----
-; The skin updates once per second (see [Rainmeter] Update=1000), and WebParser re-downloads a fresh
-; verse every RotateEvery updates. 1800 = 30 minutes. (Click the panel for the next verse anytime.)
-; Editable from the settings panel (clamped to at least MinRotateEvery).
+; The skin updates once per second (see [Rainmeter] Update=1000). [MeasureRotateTick] counts those
+; updates and fetches the next verse every RotateEvery seconds. 1800 = 30 minutes. (Use the next-verse
+; control for the next verse anytime.) Editable from the settings panel (clamped to at least MinRotateEvery).
 RotateEvery=1800
-; AutoChange toggles automatic rotation on (1) or off (0). It feeds EffectiveRate below.
+; AutoChange toggles automatic rotation on (1) or off (0). [MeasureRotateTick] only fetches when it is 1.
+; Both RotateEvery and AutoChange are read dynamically, so changing either takes effect with no refresh
+; and never refetches the current verse.
 AutoChange=1
-; EffectiveRate feeds the WebParser UpdateRate: AutoChange * RotateEvery (0 pauses rotation). The settings
-; panel keeps it in sync and refreshes the skin so the WebParser picks up the new rate. Do not hand-edit.
-EffectiveRate=1800
+; [MeasureQuran] UpdateRate. It counts skin updates (one per second); the WebParser re-downloads on its own
+; timer only when the counter reaches this value. Set effectively to "never" so downloads happen only on
+; load and on demand ([MeasureRotateTick] rotation and the next-verse click, via CommandMeasure Update).
+; Do NOT lower it: a smaller value would make the WebParser download on its own, ungated by AutoChange.
+DownloadOnDemandRate=2000000000
 
 ; ---- Layout ----
 ; PanelWidth is the resolved width the skin renders at. When width is "auto" the settings panel sets it to

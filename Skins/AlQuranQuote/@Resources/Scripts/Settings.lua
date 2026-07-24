@@ -5,8 +5,9 @@
 --   2. applies it to the running MAIN skin (via !SetVariable, without a refresh, so the verse does not
 --      refetch), then repaints the panel's previews in place.
 -- The settings panel itself is never refreshed, so editing the skin never disturbs the panel.
--- Exceptions that DO refresh the main skin: rotation changes (RotateEvery/AutoChange feed the WebParser
--- UpdateRate, which is only read at load) and Reset.
+-- Rotation changes (RotateEvery/AutoChange) also apply live via !SetVariable: [MeasureRotateTick] reads
+-- them dynamically, so toggling rotation or changing the duration never refetches the verse. Only Reset
+-- refreshes the main skin (which does refetch a verse).
 
 local mainConfigName = 'AlQuranQuote'
 
@@ -172,15 +173,14 @@ local function applyHeight(heightAuto, fixedHeight)
 	SKIN:Bang('!Redraw', mainConfigName)
 end
 
--- Recompute EffectiveRate (AutoChange * RotateEvery; 0 pauses rotation), persist it, and refresh the main
--- skin so the WebParser picks up the new UpdateRate. A refresh re-downloads a verse; this is the reliable
--- Rainmeter way to change the WebParser's download timer.
+-- Apply rotation changes (auto on/off and duration) to the main skin WITHOUT a refresh, so the displayed
+-- verse is never refetched. [MeasureRotateTick] in the main skin reads AutoChange and RotateEvery with
+-- DynamicVariables=1, so setting them live takes effect on the next tick.
 local function applyRotation()
-	local effective = autoChange * rotateEvery
 	persist('AutoChange', autoChange)
 	persist('RotateEvery', rotateEvery)
-	persist('EffectiveRate', effective)
-	SKIN:Bang('!Refresh', mainConfigName)
+	SKIN:Bang('!SetVariable', 'AutoChange', autoChange, mainConfigName)
+	SKIN:Bang('!SetVariable', 'RotateEvery', rotateEvery, mainConfigName)
 end
 
 -- ---- Seeding (shared by load and reset) ----
@@ -571,7 +571,6 @@ function resetSettings()
 	for key, value in pairs(defaults) do
 		persist(key, value)
 	end
-	persist('EffectiveRate', defaults.AutoChange * defaults.RotateEvery)
 	SKIN:Bang('!Refresh', mainConfigName)
 
 	local fontColorParts = splitNumbers(defaults.QuoteColor)

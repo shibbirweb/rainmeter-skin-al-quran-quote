@@ -48,6 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Toggling "Change verse automatically" (or changing the rotation duration) no longer replaces the
+  displayed verse. Rotation is now decoupled from the download: a new `[MeasureRotateTick]` timer fetches
+  the next verse every `RotateEvery` seconds while `AutoChange` is on, and the settings panel applies both
+  via `!SetVariable` (read dynamically) instead of `!Refresh`, so the current verse stays put. Removed the
+  now-unused `EffectiveRate` variable.
+- The next-verse control and the rotation timer now fetch reliably. `[MeasureQuran]` keeps updating with a
+  very large `UpdateRate` (`DownloadOnDemandRate`) so it never auto-downloads, and both triggers pair
+  `!CommandMeasure ... "Update"` with `!UpdateMeasure` so the download starts immediately (`UpdateDivider=-1`
+  would have stopped the measure updating, leaving forced updates with nothing to process).
 - Verses now load on machines with proxy auto-detection (WPAD) enabled. `[MeasureQuran]` sets
   `ProxyServer=/none` to force a direct connection; WebParser otherwise uses the system/IE proxy config,
   which could hang the download indefinitely (no `FinishAction`, no error) and leave the skin stuck on

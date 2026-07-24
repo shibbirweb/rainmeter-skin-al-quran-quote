@@ -40,9 +40,9 @@ Data flow:
 1. `[MeasureQuran]` (WebParser) fetches
    `https://api.quran.com/api/v4/verses/random?language=en&translations=20`
    (translation resource 20 = Saheeh International). `verses/random` returns a new verse on every real
-   download, so no cache-buster is needed. `UpdateRate=#EffectiveRate#` re-downloads on a timer (rotation);
-   clicking the next-verse icon runs `[!CommandMeasure MeasureQuran "Update"]` to fetch immediately. See
-   the rotation note below.
+   download, so no cache-buster is needed. It downloads once on load; rotation and the next-verse click
+   both fetch by running `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure MeasureQuran]`. See the
+   rotation note below.
 2. Child measures extract fields via `StringIndex` from the regex
    `(?siU)"verse_key":"(.*)".*"text":"(.*)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
    translation (HTML tags stripped via `RegExpSubstitute`).
@@ -95,17 +95,25 @@ resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed 
 height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
 it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.
 
-Rotation uses the WebParser's own `UpdateRate=#EffectiveRate#`, where `EffectiveRate = AutoChange *
-RotateEvery` (0 pauses rotation). The WebParser downloads on load (so the first verse appears) and then
-every `EffectiveRate` seconds. `Settings.lua`'s `applyRotation` recomputes `EffectiveRate` on an AutoChange
-or duration change, persists it, and `!Refresh`es the main skin so the WebParser picks up the new rate.
-Note: because `UpdateRate` is only read at (re)load and the WebParser parent must NOT carry
-`DynamicVariables` (see the gotcha above), changing rotation requires a refresh, which re-downloads a verse.
-This was deliberately chosen over a decoupled timer approach (a `Calc` firing `[!CommandMeasure MeasureQuran
-"Update"]` with `UpdateRate=0`/huge): on this skin, forced `Update` calls with a 0/huge `UpdateRate` did not
-reliably fetch, leaving the skin stuck on "Loading verse...". Do NOT set `UpdateDivider=-1` on the WebParser
-either: it stops the measure updating, so a completed download never gets processed. Reset restores a
-`defaults` table in `Settings.lua`. The settings panel is never refreshed; its
+Rotation is decoupled from the download so toggling rotation or changing the duration never refetches the
+displayed verse. `[MeasureRotateTick]` (a `Calc`, `DynamicVariables=1`) counts one per second and wraps to
+0 every `RotateEvery` seconds via `(MeasureRotateTick + 1) % #RotateEvery#`; when it hits 0 and
+`#AutoChange#` is 1 it fires `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure MeasureQuran]`.
+`Settings.lua`'s `applyRotation` persists `AutoChange`/`RotateEvery` and applies them live with
+`!SetVariable ... "AlQuranQuote"` (NO refresh); the tick reads both dynamically, so a change takes effect on
+the next tick. Only Reset uses `!Refresh` (which does refetch).
+
+The WebParser must keep updating for this to work, so it uses `UpdateRate=#DownloadOnDemandRate#` (a very
+large value), NOT `UpdateDivider=-1`. Why: `CommandMeasure "Update"` only resets the WebParser's internal
+counter; the actual download runs inside the measure's next `UpdateValue`, i.e. on its next update. With
+`UpdateDivider=-1` the measure never updates again, so `Update` (both rotation and the click) silently
+downloads nothing. A large non-zero `UpdateRate` keeps the counter climbing so the WebParser never
+auto-downloads on its own timer, while `Command "Update"` (paired with `!UpdateMeasure` to force the update
+this tick) still fetches on demand. Do NOT use `UpdateRate=0`: that makes the counter reset to 0 every
+update, so it refetches every second and the downloads thrash and never settle (stuck on "Loading
+verse..."). This is the pitfall an earlier decoupled attempt hit; the fix is a large non-zero rate plus
+`!UpdateMeasure`, not `UpdateDivider=-1` and not `0`. Reset restores a `defaults` table in `Settings.lua`.
+The settings panel is never refreshed; its
 previews update in place via `!UpdateMeter`/`!Redraw`, and `loadSettings()`/`resetSettings()` share one
 `seedWorkingState` helper (never read a variable back right after `!SetVariable` in the same call). Because
 the panel reloads its `Initialize` each time it is toggled on, it always opens showing current values. Do
