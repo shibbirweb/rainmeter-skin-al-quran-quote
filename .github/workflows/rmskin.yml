@@ -44,8 +44,11 @@ jobs:
 
       - name: Stamp version into skin [Metadata]
         run: |
-          sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" Skins/AlQuranQuote/AlQuranQuote.ini
-          sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" Skins/AlQuranQuote/Settings/Settings.ini
+          # Stamp every skin .ini under the skin tree: the base, the settings panel, and each pooled clone
+          # window (Windows/Wn/Wn.ini). Each has a [Metadata] Version line to update.
+          find Skins/AlQuranQuote -name '*.ini' -print0 | while IFS= read -r -d '' ini; do
+            sed -i -E "s/^Version=.*/Version=${{ steps.version.outputs.value }}/" "$ini"
+          done
 
       - name: Build .rmskin
         id: builder

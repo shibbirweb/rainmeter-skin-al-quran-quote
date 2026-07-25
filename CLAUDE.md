@@ -13,29 +13,58 @@ verse; it also rotates on a timer.
 
 ```
 Skins/AlQuranQuote/           Skin folder (this layout is what the rmskin packager expects).
-  AlQuranQuote.ini            Main skin structure: [Rainmeter], [Metadata], measures, meters, settings icon.
+  AlQuranQuote.ini            Window 1 (base): [Rainmeter], [Metadata], @IncludeVariables, then @Include Quote.inc.
+  Windows/W2..W8/             Pooled clone windows (up to 8 total). Each Wn/Wn.ini is a tiny config that
+    Wn/Wn.ini                 @Includes the shared Quote.inc; Wn/@Resources/ holds that window's own
+    Wn/@Resources/            Variables.inc (styling) + LastVerse.inc (its verse). Activated on demand.
   Settings/
-    Settings.ini              Settings panel (a child config toggled by the settings icon). Font list,
-                              color sliders, opacity range; applies changes via Settings.lua.
+    Settings.ini              Settings panel (a child config). Retargets to whichever window opened it.
     @Resources/
-      SettingsTheme.inc       The panel's OWN look + layout + curated font list + working state. Separate
-                              from the skin's Variables.inc so editing the skin never restyles the panel.
+      SettingsTheme.inc       The panel's OWN look + layout + curated font list + working state.
   @Resources/
-    Variables.inc             All tunables (colors, fonts, sizes, styles, RotateEvery, bounds). Themed here.
-    LastVerse.inc             Persisted last verse (UTF-16), restored on restart. Included after Variables.inc.
-    UserContent.inc           User-typed ReferenceLabel + CustomText (UTF-16, so Unicode persists).
+    Quote.inc                 SHARED render (measures + meters). @Include'd by the base and every clone.
+    Variables.inc             Base window tunables + global WindowCount/MaxWindows. Themed here.
+    LastVerse.inc             Base window's persisted verse (UTF-16). Each window has its own.
+    UserContent.inc           SHARED ReferenceLabel + CustomText (UTF-16); included by all windows.
+    Target.inc                Which window the settings panel is editing (TargetConfig); set by a gear.
     Scripts/RandomAyah.lua     Entry points: Initialize, Update, Online, Offline, nextVerse.
     Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, persists them, repaints.
     Scripts/QuoteFile.lua      readLines(path), parseLine(line): offline file I/O and parsing.
-    Scripts/Settings.lua       Backs the settings panel: seed working vars on open, apply changes to the
-                              main skin (no refetch), no self-refresh of the panel.
-    quotes.txt                Offline verses, one "English | Quran X:Y" per line.
+    Scripts/Settings.lua       Backs the settings panel: seed from the target window, apply to it, window count.
+    quotes.txt                SHARED offline verses, one "English | Quran X:Y" per line.
 RMSKIN.ini                    Packaging metadata read by the rmskin packager.
 .github/workflows/rmskin.yml  CI: builds the .rmskin and attaches it to the release on a v* tag.
 ```
 
 Paths inside `RMSKIN.ini` (`LoadName`, `VariableFiles`) are relative to `Skins/`, so they stay
-`AlQuranQuote\...` even though the folder now lives under `Skins/`.
+`AlQuranQuote\...` even though the folder now lives under `Skins/`. `VariableFiles` lists the base and every
+clone `Variables.inc` (pipe-separated) so per-window styling survives upgrades.
+
+Multiple windows (one per screen): the skin ships a pool of up to 8 quote windows. Window 1 is the base
+`AlQuranQuote.ini`; windows 2-8 are pre-shipped clone configs `Windows/Wn/Wn.ini`. The render code
+(measures + meters) is single-sourced in `@Resources/Quote.inc`, which the base and every clone `@Include`
+(base via `#@#Quote.inc`, clones via `#SKINSPATH#AlQuranQuote\@Resources\Quote.inc`). Code is shared but
+state is per-window, resolved via Rainmeter BUILT-INS used directly (not custom variables): the shared
+scripts + `quotes.txt` live in the base `@Resources`, reached with `#SKINSPATH#AlQuranQuote\@Resources\`
+(`[MeasureRandom] ScriptFile`, and `RandomAyah.lua`'s `sharedResources()` for the dofiles + `quotes.txt`);
+each window persists its own verse to its OWN `@Resources` via `#CURRENTPATH#@Resources\LastVerse.inc`
+(`Verse.lua`). IMPORTANT: do NOT reintroduce a custom path variable like `SharedRes=#SKINSPATH#...` and use
+it in `ScriptFile` -- Rainmeter does not re-expand a built-in nested inside a custom variable when resolving
+`ScriptFile`, so the script path comes out invalid ("Script: File not valid"); use the built-in directly.
+Also a subfolder config's `#@#` resolves to the ROOT `@Resources`, so clones must use `#CURRENTPATH#` (their
+own folder) for state and `@IncludeVariables` -- never `#@#`. `Variables.inc` is per-window (independent
+styling); `UserContent.inc` (reference label, custom text) is shared from the base. Each clone `.ini` is
+authored by a quoted heredoc so trailing backslashes in paths are literal (an unquoted heredoc turns a
+line-final `\` into a line-continuation and merges the next line). The settings "Quote windows" spinner (Panel tab, `nudgeWindowCount`)
+`!ActivateConfig`/`!DeactivateConfig`s `Windows\W2..W8`; Rainmeter reloads active configs on restart, so the
+count sticks. The one settings panel edits whichever window opened it: each window's gear writes its config
+name to `Target.inc` and reloads the panel, whose `Settings.lua` reads `TargetConfig` (default
+`AlQuranQuote`), derives that window's `@Resources` from it plus `#SKINSPATH#`, seeds the panel by io-parsing
+that window's `Variables.inc` (`readTargetVars`), and applies/persists to it (`targetConfig()`/`targetRes()`
+replace the old hardcoded `mainConfigName`). `WindowCount` is global and always persists to the base
+`Variables.inc` (`baseVariablesFilePath`). To add a clone beyond 8, author another `Windows/Wn` folder (copy
+an existing one) and raise `MaxWindows`; the whole `Skins/` tree ships automatically, and CI version-stamps
+every `.ini`.
 
 Data flow:
 

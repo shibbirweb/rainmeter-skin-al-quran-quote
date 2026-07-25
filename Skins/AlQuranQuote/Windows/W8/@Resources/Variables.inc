@@ -104,19 +104,6 @@ NextIconHeight=14
 ; settings Verse tab's "Change verse" button instead). Editable from the settings panel.
 NextIconHidden=0
 
-; ---- Multiple windows (a pool of extra quote windows, one per screen) ----
-; WindowCount is how many quote windows are active in total (1 = just this base window; up to 8). The
-; settings panel's setWindowCount activates Windows\W2..W(WindowCount) and deactivates the rest; each extra
-; window is its own config with its own verse and styling. This value is global (managed only on the base
-; skin's Variables.inc, even when the panel is targeting a clone). MaxWindows is the shipped pool size.
-WindowCount=1
-MaxWindows=8
-; WindowNumber identifies this window (1 = base; clones are 2..8). Editing is a runtime flag the settings
-; panel sets to 1 on the window it is currently editing (and 0 on the others), which shows an "editing" badge
-; on that window so you can tell which one the panel controls. Editing defaults to 0.
-WindowNumber=1
-Editing=0
-
 ; ---- Settings bounds ----
 ; Named limits the settings panel clamps numeric input to, so a bad value can never corrupt the skin.
 MinQuoteSize=6
@@ -134,3 +121,7 @@ MinFixedWidth=160
 MaxFixedWidth=1000
 MinFixedHeight=80
 MaxFixedHeight=1000
+
+; This window's identity (see base Variables.inc). WindowNumber is fixed per clone; Editing is set by the settings panel.
+WindowNumber=8
+Editing=0

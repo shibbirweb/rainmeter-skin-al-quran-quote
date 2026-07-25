@@ -69,6 +69,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Show or hide the settings icon and the next-verse icon on the skin, and a Reset to defaults.
   - Every typed input field notes "(press Enter to apply)" in its tooltip, so it is clear a typed value
     takes effect only on Enter.
+- Multiple quote windows, one per screen: a pool of up to 8 windows (the base plus seven pre-shipped clone
+  configs under `Windows/Wn`). A "Quote windows" spinner on the settings Panel tab activates/deactivates the
+  extras; each window has its own verse (independent rotation/fetch) and its own styling. The render code is
+  single-sourced in a shared `@Resources/Quote.inc` that every window `@Includes`; the shared scripts resolve
+  the base `@Resources` via `#SKINSPATH#` and each window's own state via `#CURRENTPATH#`. The one settings
+  panel edits whichever window's gear opened it (via `Target.inc`), seeding from and applying to that window.
+  The panel header shows "Window N" and the window being edited shows an "Editing: Window N" badge, so it is
+  clear which window the settings control. The header shows "editing Window N", and when more than one window
+  is active it adds "< Prev" / "Next >" buttons that switch which window the panel edits, so you can retarget
+  even when the settings icon is hidden on the windows.
 - Appearance and reference changes apply to the running skin live (via `!SetVariable`) without refetching a
   verse; only Reset refreshes. The reference line is composed in Lua so a hidden part leaves no gap and a
   lone label stays centered.

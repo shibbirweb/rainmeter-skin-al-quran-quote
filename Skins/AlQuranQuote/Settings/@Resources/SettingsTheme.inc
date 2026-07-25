@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=616
+SettingsHeight=640
 Col1X=16
 Col2X=316
 Pad=16
@@ -84,7 +84,10 @@ TextVCenterAdjust=2
 ; time (Settings.lua's setTab hides the other Tab groups); every tab's blocks stack from ContentTopY, so
 ; the base-Y values below repeat that start per tab. ActiveTab and the Tab*Color values are seeded by Lua.
 ActiveTab=1
-TabBarY=42
+; The header is two rows: row 1 (Y=Pad) is the title + "editing Window N"; row 2 (Y=Pad+24) is the window
+; switcher (< Prev / Next > + note). TabBarY sits below both rows; ContentTopY below the tabs. If the header
+; height changes, shift TabBarY, ContentTopY and every base-Y below by the same amount (as done here, +24).
+TabBarY=66
 TabH=26
 TabGap=6
 TabW=190
@@ -94,56 +97,58 @@ Tab3X=408
 Tab1Color=120,200,255,255
 Tab2Color=150,156,166,255
 Tab3Color=150,156,166,255
-ContentTopY=78
+ContentTopY=102
 
 ; ---- Block base-Y positions (each tab is two columns, each column stacks from ContentTopY) ----
 ; Tab 1 (Text): left column = Quote (family, size, style, color); right column = Reference (same set).
-FamilyBaseY=78
-SizeBaseY=152
-StyleBaseY=200
-FontColorBaseY=248
-RefFamilyBaseY=78
-RefSizeBaseY=152
-RefStyleBaseY=200
-RefColorBaseY=248
+FamilyBaseY=102
+SizeBaseY=176
+StyleBaseY=224
+FontColorBaseY=272
+RefFamilyBaseY=102
+RefSizeBaseY=176
+RefStyleBaseY=224
+RefColorBaseY=272
 ; Quote drop shadow, stacked below the Quote color block in the left column (Quote only). The shadow
 ; color block makes the Text tab's left column the tallest column across all tabs, so ResetBaseY and
 ; SettingsHeight below grow to fit it.
-ShadowBaseY=384
-ShadowColorBaseY=436
+ShadowBaseY=408
+ShadowColorBaseY=460
 ; Shadow offset X/Y sliders sit in the right column, level with the shadow color block (Col2X origin).
-ShadowOffsetBaseY=436
+ShadowOffsetBaseY=460
 ; Tab 2 (Panel): left column = background color + background/border opacity (sliders); right column =
 ; width + height + settings icon.
-BgColorBaseY=78
-OpacityBaseY=186
-BorderOpacityBaseY=256
-WidthBaseY=78
-HeightBaseY=148
-ShowIconBaseY=218
-ShowNextIconBaseY=266
+BgColorBaseY=102
+OpacityBaseY=210
+BorderOpacityBaseY=280
+WidthBaseY=102
+HeightBaseY=172
+ShowIconBaseY=242
+ShowNextIconBaseY=290
+; Quote-windows spinner (global pool control) sits below the show-next-icon block in the right column.
+WindowCountBaseY=338
 ; Tab 3 (Verse): left column = rotation + duration + online fetch + online-fetch language + reference label
 ; + show toggles; right column = custom verse + custom text + sura + verse + open offline verses + change.
-RotateToggleBaseY=78
-DurationBaseY=126
-OnlineFetchBaseY=174
+RotateToggleBaseY=102
+DurationBaseY=150
+OnlineFetchBaseY=198
 ; Everything below Online fetch is shifted down 24px to make room for the offline-fallback note under it.
-LanguageBaseY=246
-ReferenceLabelBaseY=320
-ShowReferenceLabelBaseY=368
-ShowVerseNumberBaseY=416
-CustomVerseBaseY=78
-CustomTextBaseY=126
-SuraNumberBaseY=174
-VerseNumberBaseY=222
-OfflineVersesBaseY=270
-ChangeVerseBaseY=318
+LanguageBaseY=270
+ReferenceLabelBaseY=344
+ShowReferenceLabelBaseY=392
+ShowVerseNumberBaseY=440
+CustomVerseBaseY=102
+CustomTextBaseY=150
+SuraNumberBaseY=198
+VerseNumberBaseY=246
+OfflineVersesBaseY=294
+ChangeVerseBaseY=342
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs). The Text
 ; tab's Quote drop-shadow color block (ends near 570) is now the tallest, so this sits below it.
-ResetBaseY=574
+ResetBaseY=598
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
-FontListTop=116
+FontListTop=140
 FontItemH=22
 FontCount=10
 ItemInset=8
@@ -164,7 +169,7 @@ Font10=Trebuchet MS
 ; other translation is reachable via the "type a translation id" input. Reuses FontItemH/ItemInset/ListVPad.
 ; The 13-item list is tall, so it opens at this fixed Y (a modal overlay covering the tab's lower controls)
 ; rather than directly under the Language row, so it always fits inside the panel.
-LangListTop=146
+LangListTop=170
 LangCount=13
 ; Trans is a translation resource id, except the Arabic sentinel "uthmani": Settings.lua then fetches the
 ; original ayah (fields=text_uthmani) instead of a translation.
@@ -211,6 +216,11 @@ Lang13Trans=uthmani
 ; ---- Working state (seeded from the skin's current values by Settings.lua on open) ----
 ; The curated font list is shared by the Quote and Reference family rows: FontListTarget records which one
 ; a click applies to, and FontListX places the overlay under the clicked row (left or right column).
+; Which quote window the panel edits (also set from the base Target.inc include; that include wins). The
+; panel derives the target's @Resources path from this name + #SKINSPATH#, so it can seed/apply any window.
+TargetConfig=AlQuranQuote
+; Friendly name of the edited window ("Window N"), shown in the header so you know which window this is.
+TargetLabel=Window 1
 FontListVisible=0
 FontListTarget=quote
 FontListX=16

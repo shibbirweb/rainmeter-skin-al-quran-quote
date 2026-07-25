@@ -35,7 +35,9 @@ end
 -- Write the shown verse to LastVerse.inc so it is restored on the next Rainmeter start (that file is
 -- UTF-16, so Unicode verse text persists). VersePersisted flips to 1 so the load logic keeps it.
 local function persistLastVerse(quoteText, verseKey, useLabelFlag, refText)
-	local file = SKIN:GetVariable('@') .. 'LastVerse.inc'
+	-- #CURRENTPATH# is THIS window's own folder (built-in, per config), so each window persists its own verse
+	-- to its own @Resources\LastVerse.inc, not the shared one.
+	local file = SKIN:GetVariable('CURRENTPATH') .. '@Resources\\LastVerse.inc'
 	SKIN:Bang('!WriteKeyValue', 'Variables', 'QuoteText', quoteText, file)
 	SKIN:Bang('!WriteKeyValue', 'Variables', 'VerseKey', verseKey, file)
 	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefText', refText, file)
@@ -77,7 +79,7 @@ function refreshReference()
 	local useLabel = tonumber(SKIN:GetVariable('RefUseLabel')) == 1
 	local refText = composeReferenceText(verseKey, useLabel)
 	SKIN:Bang('!SetVariable', 'RefText', refText)
-	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefText', refText, SKIN:GetVariable('@') .. 'LastVerse.inc')
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefText', refText, SKIN:GetVariable('CURRENTPATH') .. '@Resources\\LastVerse.inc')
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end
