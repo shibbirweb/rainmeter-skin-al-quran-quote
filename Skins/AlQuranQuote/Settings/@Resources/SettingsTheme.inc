@@ -72,6 +72,8 @@ ResetButtonW=584
 ResetButtonH=26
 ResetButtonBg=60,66,76,255
 ResetButtonColor=235,235,235,255
+; Height of inline action buttons (e.g. the Change-verse button).
+ButtonH=24
 
 ; ---- Tabs ----
 ; The settings are split into three tabs so the panel stays short. Only one tab's meters are shown at a
