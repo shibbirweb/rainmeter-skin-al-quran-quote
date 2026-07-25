@@ -33,8 +33,8 @@ RotateEvery=1800
 AutoChange=1
 ; OnlineFetchEnabled toggles fetching from the quran.com API on (1) or off (0). When 0 the skin never
 ; hits the network: load, rotation, and the next-verse control all draw from the offline quotes.txt.
-; Editable from the settings panel.
-OnlineFetchEnabled=1
+; Off by default (offline). Editable from the settings panel.
+OnlineFetchEnabled=0
 ; [MeasureQuran] UpdateRate. It counts skin updates (one per second); the WebParser re-downloads on its own
 ; timer only when the counter reaches this value. Set effectively to "never" so downloads happen only on
 ; load and on demand ([MeasureRotateTick] rotation and the next-verse click, via CommandMeasure Update).

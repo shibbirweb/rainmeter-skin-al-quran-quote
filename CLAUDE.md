@@ -76,7 +76,7 @@ which picks the source: the custom verse if `#CustomVerseEnabled#` is 1, else an
 `#OnlineFetchEnabled#` is 1 (`CommandMeasure MeasureQuran "Update"` + `!UpdateMeasure`), else a new offline
 verse from `quotes.txt`. When online fetching is off, `Online()` ignores the one background download that
 still happens on load (it returns early), and `Initialize` shows an offline verse immediately. The settings
-panel's "open fallback file" control runs `[notepad "#ROOTCONFIGPATH#@Resources\quotes.txt"]` so the user
+panel's "open offline verses file" control runs `[notepad "#ROOTCONFIGPATH#@Resources\quotes.txt"]` so the user
 can edit the offline verses; `Offline()` re-reads the file each time, so no refresh is needed.
 
 Custom verse: when `#CustomVerseEnabled#` is 1 the skin shows the user's `#CustomText#` with the manual

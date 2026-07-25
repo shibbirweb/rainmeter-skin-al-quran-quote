@@ -109,7 +109,7 @@ HeightBaseY=148
 ShowIconBaseY=218
 ShowNextIconBaseY=266
 ; Tab 3 (Verse): left column = rotation + duration + online fetch + reference label + show toggles; right
-; column = custom verse + custom text + sura + verse + open fallback file.
+; column = custom verse + custom text + sura + verse + open offline verses file.
 RotateToggleBaseY=78
 DurationBaseY=126
 OnlineFetchBaseY=174
@@ -120,7 +120,7 @@ CustomVerseBaseY=78
 CustomTextBaseY=126
 SuraNumberBaseY=174
 VerseNumberBaseY=222
-OpenFallbackBaseY=270
+OfflineVersesBaseY=270
 ChangeVerseBaseY=318
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs).
 ResetBaseY=394

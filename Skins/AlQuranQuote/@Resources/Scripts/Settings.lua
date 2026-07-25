@@ -52,7 +52,7 @@ local defaults = {
 	CustomText = '',
 	SuraNumber = '',
 	VerseNumberManual = '',
-	OnlineFetchEnabled = 1,
+	OnlineFetchEnabled = 0,
 }
 
 function Initialize()
@@ -419,7 +419,7 @@ function loadSettings()
 		showReferenceLabel = tonumber(SKIN:GetVariable('ShowReferenceLabel')) or 1,
 		showVerseNumber = tonumber(SKIN:GetVariable('ShowVerseNumber')) or 1,
 		customVerseEnabled = tonumber(SKIN:GetVariable('CustomVerseEnabled')) or 0,
-		onlineFetchEnabled = tonumber(SKIN:GetVariable('OnlineFetchEnabled')) or 1,
+		onlineFetchEnabled = tonumber(SKIN:GetVariable('OnlineFetchEnabled')) or 0,
 		customText = SKIN:GetVariable('CustomText'),
 		suraNumber = SKIN:GetVariable('SuraNumber'),
 		verseNumber = SKIN:GetVariable('VerseNumberManual'),
