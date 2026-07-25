@@ -5,24 +5,6 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-
-- Quote drop shadow: a "drop shadow" toggle, a shadow color picker (R/G/B/A), and shadow offset X/Y
-  sliders on the settings Text tab (Quote only). The shadow is a manual `[MeterQuoteShadow]` meter (a copy
-  of the quote drawn behind it), so its offset is adjustable, backed by the new `QuoteShadowEnabled`,
-  `QuoteShadowColor`, `QuoteShadowOffsetX`, and `QuoteShadowOffsetY` variables; all apply live without
-  refetching the verse. (Shadow blur/softness is not offered: Rainmeter cannot blur live text.)
-
-### Changed
-
-- Default quote font is now Calibri (was Georgia), and the default background opacity is now 50 (was 205).
-  The default border opacity stays 25.
-- The settings "Custom text" label is now "Custom single text".
-- Tooltips on every typed input field now note "(press Enter to apply)", so it is clear a typed value only
-  takes effect on Enter.
-
 ## [1.0.0] - 2026-07-25
 
 ### Fixed
@@ -58,11 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   files; changes save to `Variables.inc` and apply immediately. It is organized into three tabs
   (Text / Panel / Verse), each laid out in two columns:
   - Separate font controls for the Quote (left column) and the Reference (right column) on the Text tab,
-    each with font family (a curated clickable list plus a type-any-font input), a size slider, style
-    buttons (Bold / Regular / Italic), and an R/G/B/A color picker with a live preview swatch.
+    each with font family (a curated clickable list plus a type-any-font input; default Calibri for the
+    Quote, Segoe UI for the Reference), a size slider, style buttons (Bold / Regular / Italic), and an
+    R/G/B/A color picker with a live preview swatch. The Quote also has a drop-shadow toggle with a shadow
+    color picker and X/Y offset sliders, drawn as a manual shadow meter so the offset is adjustable
+    (Rainmeter cannot blur live text, so no blur is offered).
   - Background color and opacity via R/G/B sliders with a live preview swatch; colors and opacity can also
     be typed directly.
-  - Background opacity and border opacity sliders.
+  - Background opacity (default 50) and border opacity (default 25) sliders.
   - Panel width and height: automatic, or a fixed pixel value.
   - Automatic rotation on/off and the change duration (seconds between verses).
   - Editable reference label (default "Al Quran"), with show/hide toggles for the label and the verse
@@ -71,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     of a fetched verse; while it is on, rotation pauses and the next-verse control is hidden so the custom
     verse is never overwritten.
   - Online fetch on/off (off by default): when off, load, rotation, and the next-verse control all draw
-    from the offline `quotes.txt` instead of hitting the API.
+    from the offline `quotes.txt` instead of hitting the API. A note under the control explains that
+    offline verses are shown on change when no internet connection is available.
   - Online verse language: a click-to-open list of popular languages (English default), including Arabic
     (the original ayah via `text_uthmani`), plus a "type a translation id" input (with a "browse all
     translation ids" link to the quran.com API) to use any of the ~126 quran.com translations. Non-Latin
@@ -81,6 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - A "Change verse" button to show the next verse from the settings panel (handy when the next-verse icon
     is hidden).
   - Show or hide the settings icon and the next-verse icon on the skin, and a Reset to defaults.
+  - Every typed input field notes "(press Enter to apply)" in its tooltip, so it is clear a typed value
+    takes effect only on Enter.
 - Appearance and reference changes apply to the running skin live (via `!SetVariable`) without refetching a
   verse; only Reset refreshes. The reference line is composed in Lua so a hidden part leaves no gap and a
   lone label stays centered.

@@ -127,10 +127,11 @@ ShowNextIconBaseY=266
 RotateToggleBaseY=78
 DurationBaseY=126
 OnlineFetchBaseY=174
-LanguageBaseY=222
-ReferenceLabelBaseY=296
-ShowReferenceLabelBaseY=344
-ShowVerseNumberBaseY=392
+; Everything below Online fetch is shifted down 24px to make room for the offline-fallback note under it.
+LanguageBaseY=246
+ReferenceLabelBaseY=320
+ShowReferenceLabelBaseY=368
+ShowVerseNumberBaseY=416
 CustomVerseBaseY=78
 CustomTextBaseY=126
 SuraNumberBaseY=174
