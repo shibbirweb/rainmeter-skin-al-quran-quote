@@ -66,7 +66,7 @@ IconGap=6
 
 ; ---- Theme ----
 ; All of these are editable from the settings panel (Text tab: Quote on the left, Reference on the right).
-QuoteFont=Georgia
+QuoteFont=Calibri
 RefFont=Segoe UI
 QuoteSize=13
 RefSize=10
@@ -87,7 +87,7 @@ QuoteShadowOffsetY=2
 ; Background color and border are each split into RGB and opacity so color and opacity change on their own.
 ; The panel fill is PanelColorRGB,PanelOpacity and the border is PanelBorderRGB,PanelBorderOpacity.
 PanelColorRGB=18,22,28
-PanelOpacity=205
+PanelOpacity=50
 PanelBorderRGB=255,255,255
 PanelBorderOpacity=25
 

@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `QuoteShadowColor`, `QuoteShadowOffsetX`, and `QuoteShadowOffsetY` variables; all apply live without
   refetching the verse. (Shadow blur/softness is not offered: Rainmeter cannot blur live text.)
 
+### Changed
+
+- Default quote font is now Calibri (was Georgia), and the default background opacity is now 50 (was 205).
+  The default border opacity stays 25.
+- The settings "Custom text" label is now "Custom single text".
+- Tooltips on every typed input field now note "(press Enter to apply)", so it is clear a typed value only
+  takes effect on Enter.
+
 ## [1.0.0] - 2026-07-25
 
 ### Fixed
