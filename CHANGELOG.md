@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Non-ASCII characters in verses (e.g. the `ā`/`ī` in "Allāh") no longer show as `?`/unknown. `RandomAyah.lua`
+  is saved as UTF-16 LE with a BOM so Rainmeter treats it as Unicode and marshals verse text as UTF-8 across
+  the Lua boundary. (The chosen font must have glyphs for the script; Georgia covers Latin.)
 - Verses containing quotation marks (e.g. 23:47) are no longer truncated at the first quote. The WebParser
   text group is now greedy so it captures to the real closing quote, and the API's `\"` / `\/` escapes are
   converted back to `"` / `/` for display.

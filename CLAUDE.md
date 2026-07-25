@@ -170,8 +170,21 @@ so the icon never overlaps the text.
 
 Icons are vector Shapes, not font glyphs: the main panel's open icon is three lines with knobs and the
 panel's close icon is a crossed X. This avoids the mojibake that appears when a `.ini` with non-ASCII
-glyphs is read as ANSI. Keep the skin files ASCII; if any file ever needs non-ASCII, save it as UTF-8 with
-a BOM (Rainmeter reads UTF-8 without a BOM as ANSI).
+glyphs is read as ANSI. Keep the `.ini`/`.inc` files ASCII; if any ever needs non-ASCII, save it as UTF-8
+with a BOM (Rainmeter reads UTF-8 without a BOM as ANSI).
+
+Unicode in verse text: `RandomAyah.lua` is saved as UTF-16 LE with a BOM. A Rainmeter Lua script is only
+treated as Unicode when its file starts with the UTF-16 LE BOM (`0xFF 0xFE`); otherwise every string that
+crosses the Rainmeter<->Lua boundary (`GetStringValue`, `GetVariable`, `!SetVariable`) is converted with
+the ANSI codepage, which turns non-ASCII characters the API returns (e.g. the `ā`/`ī` in "Allāh") into `?`.
+Because `MeasureRandom` owns that script, its Unicode flag governs the whole verse pipeline, including
+`applyVerse` in the dofile'd `Verse.lua`; those helper files and `quotes.txt` stay UTF-8 (offline lines are
+read as UTF-8 bytes and marshaled through `MeasureRandom`'s Unicode scope). Editing a UTF-16 file with the
+plain text tools can be awkward; convert to UTF-8, edit, then convert back to UTF-16 LE with BOM, or edit it
+via a script. A verse still needs a `QuoteFont` that has glyphs for the script (Georgia covers Latin incl.
+`ā`/`ī`; for Arabic or other scripts pick a suitable font in the settings). The settings-panel Lua
+(`Settings.lua`) is still ASCII, so typing non-ASCII custom text / reference label is not yet Unicode-safe;
+that would need the same UTF-16 treatment plus a UTF-8-BOM `Variables.inc` for persistence.
 
 Background color and border are each stored as RGB + opacity (`PanelColorRGB`/`PanelOpacity` and
 `PanelBorderRGB`/`PanelBorderOpacity`), so color and opacity change independently; the panel fill composes
