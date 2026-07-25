@@ -74,6 +74,10 @@ ResetButtonBg=60,66,76,255
 ResetButtonColor=235,235,235,255
 ; Height of inline action buttons (e.g. the Change-verse button).
 ButtonH=24
+; Vertical-center nudge for text inside a box (checkbox labels, button labels). Rainmeter renders a String
+; taller than its point size (font leading), so "(BoxH - FontSize) / 2" lands the text a couple of pixels
+; too low; subtracting this raises it to the visual center.
+TextVCenterAdjust=2
 
 ; ---- Tabs ----
 ; The settings are split into three tabs so the panel stays short. Only one tab's meters are shown at a
