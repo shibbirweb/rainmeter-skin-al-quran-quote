@@ -23,6 +23,7 @@ Skins/AlQuranQuote/           Skin folder (this layout is what the rmskin packag
   @Resources/
     Variables.inc             All tunables (colors, fonts, sizes, styles, RotateEvery, bounds). Themed here.
     LastVerse.inc             Persisted last verse (UTF-16), restored on restart. Included after Variables.inc.
+    UserContent.inc           User-typed ReferenceLabel + CustomText (UTF-16, so Unicode persists).
     Scripts/RandomAyah.lua     Entry points: Initialize, Update, Online, Offline, nextVerse.
     Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, persists them, repaints.
     Scripts/QuoteFile.lua      readLines(path), parseLine(line): offline file I/O and parsing.
@@ -206,9 +207,16 @@ Because `MeasureRandom` owns that script, its Unicode flag governs the whole ver
 read as UTF-8 bytes and marshaled through `MeasureRandom`'s Unicode scope). Editing a UTF-16 file with the
 plain text tools can be awkward; convert to UTF-8, edit, then convert back to UTF-16 LE with BOM, or edit it
 via a script. A verse still needs a `QuoteFont` that has glyphs for the script (Georgia covers Latin incl.
-`ā`/`ī`; for Arabic or other scripts pick a suitable font in the settings). The settings-panel Lua
-(`Settings.lua`) is still ASCII, so typing non-ASCII custom text / reference label is not yet Unicode-safe;
-that would need the same UTF-16 treatment plus a UTF-8-BOM `Variables.inc` for persistence.
+`ā`/`ī`; for Arabic or other scripts pick a suitable font in the settings).
+
+`Settings.lua` is ALSO saved as UTF-16 LE with a BOM, for the same reason: without it, typing non-ASCII
+into the custom-text or reference-label inputs is mangled when its `commit*`/`set*` functions marshal the
+value. Because `!WriteKeyValue` uses `WritePrivateProfileString`, which only persists Unicode when the
+target file has a UTF-16 BOM, those two user-typed settings live in `@Resources\UserContent.inc` (UTF-16,
+included by both the main skin and the panel) instead of `Variables.inc` (which stays ASCII so the rmskin
+`VariableFiles` installer still parses it). `Settings.lua`'s `persist` routes `ReferenceLabel`/`CustomText`
+to `UserContent.inc` and everything else to `Variables.inc`. Other typed settings (sura/verse numbers, font
+sizes) are numeric and stay ASCII.
 
 Background color and border are each stored as RGB + opacity (`PanelColorRGB`/`PanelOpacity` and
 `PanelBorderRGB`/`PanelBorderOpacity`), so color and opacity change independently; the panel fill composes

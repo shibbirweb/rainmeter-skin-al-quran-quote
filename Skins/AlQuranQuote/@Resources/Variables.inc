@@ -3,22 +3,19 @@
 
 ; ---- Content ----
 ; The displayed verse (QuoteText, VerseKey, RefText, RefUseLabel) is persisted in @Resources\LastVerse.inc,
-; which the main skin includes after this file, so the last verse is restored on restart. See that file
-; and Verse.lua's applyVerse.
-; The label shown before the verse key (editable from the settings panel).
-ReferenceLabel=Al Quran
+; and the user-typed ReferenceLabel and CustomText live in @Resources\UserContent.inc (UTF-16, so Unicode
+; survives). Both are included after this file. See those files and Verse.lua's applyVerse.
 ; ShowReferenceLabel / ShowVerseNumber toggle the two parts of the reference line (1 shows, 0 hides). They
 ; apply to both fetched verses and the custom verse. Editable from the settings panel.
 ShowReferenceLabel=1
 ShowVerseNumber=1
 
 ; ---- Custom verse (a user-provided verse shown instead of the fetched one) ----
-; When CustomVerseEnabled is 1 the skin shows CustomText with the manual SuraNumber:VerseNumberManual as
-; the reference, and does NOT fetch or rotate (the next-verse control is hidden). When 0, normal API
-; verses show. SuraNumber and VerseNumberManual are nullable: if either is empty the reference shows no
-; number (just the label, centered). All editable from the settings panel.
+; When CustomVerseEnabled is 1 the skin shows CustomText (in UserContent.inc) with the manual
+; SuraNumber:VerseNumberManual as the reference, and does NOT fetch or rotate (the next-verse control is
+; hidden). When 0, normal API verses show. SuraNumber and VerseNumberManual are nullable: if either is
+; empty the reference shows no number (just the label, centered). All editable from the settings panel.
 CustomVerseEnabled=0
-CustomText=
 SuraNumber=
 VerseNumberManual=
 

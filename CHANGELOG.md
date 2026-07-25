@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The custom-text and reference-label inputs now accept and display Unicode. `Settings.lua` is saved as
+  UTF-16 so its string marshaling is Unicode-safe, and those two typed values persist to a UTF-16
+  `UserContent.inc` (`Variables.inc` stays ASCII for the rmskin installer).
 - The skin now restores the last shown verse after a Rainmeter restart instead of refetching a new one. The
   verse is saved to a UTF-16 `LastVerse.inc` (so Unicode text survives), `[MeasureQuran]` no longer
   downloads on load (`Disabled=1`; it is enabled on demand), and the skin only fetches on first run.
