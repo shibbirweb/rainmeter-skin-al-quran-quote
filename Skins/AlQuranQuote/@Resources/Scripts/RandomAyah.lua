@@ -64,6 +64,17 @@ function applyCustomVerse()
 	applyVerse(customText, verseKey)
 end
 
+-- Turn JSON string escapes in the fetched translation into their real characters: the API escapes inner
+-- double quotes as \" and slashes as \/, so verses with quotation marks (e.g. 23:47) show in full.
+local function unescapeApiText(text)
+	if text == nil then
+		return ''
+	end
+	text = text:gsub('\\"', '"')
+	text = text:gsub('\\/', '/')
+	return text
+end
+
 -- Show the verse WebParser just parsed into the child measures (unless custom mode is on, or online
 -- fetching is off in which case the initial background download is ignored and the offline verse stays).
 function Online()
@@ -74,7 +85,7 @@ function Online()
 	if not onlineFetchEnabled() then
 		return
 	end
-	local englishTranslation = SKIN:GetMeasure('MeasureEnglish'):GetStringValue()
+	local englishTranslation = unescapeApiText(SKIN:GetMeasure('MeasureEnglish'):GetStringValue())
 	local verseKey = SKIN:GetMeasure('MeasureKey'):GetStringValue()
 	applyVerse(englishTranslation, verseKey)
 end

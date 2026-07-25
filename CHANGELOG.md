@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-07-25
 
+### Fixed
+
+- Verses containing quotation marks (e.g. 23:47) are no longer truncated at the first quote. The WebParser
+  text group is now greedy so it captures to the real closing quote, and the API's `\"` / `\/` escapes are
+  converted back to `"` / `/` for display.
+- Footnote markers no longer leave a stray digit in the verse: `<sup ...>N</sup>` blocks are removed whole
+  before the general HTML-tag strip.
+
 ### Added
 
 - Al-Quran Quote Rainmeter skin (GitHub issue #1): a minimal, semi-transparent desktop widget showing a

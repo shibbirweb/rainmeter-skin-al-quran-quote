@@ -44,8 +44,11 @@ Data flow:
    both fetch by running `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure MeasureQuran]`. See the
    rotation note below.
 2. Child measures extract fields via `StringIndex` from the regex
-   `(?siU)"verse_key":"(.*)".*"text":"(.*)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
-   translation (HTML tags stripped via `RegExpSubstitute`).
+   `(?siU)"verse_key":"(.*)".*"text":"(.*?)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
+   translation (HTML tags stripped via `RegExpSubstitute`). The text group is greedy (`(.*?)` under the
+   `(?U)` flag) so it runs to the real closing quote; a lazy group would stop at the first escaped quote
+   inside verses that contain quotation marks (e.g. 23:47) and truncate them. `Online()` then converts the
+   API's `\"` and `\/` escapes back to `"` and `/`.
 3. On success `FinishAction` calls `Online()`, which reads the child measures and calls
    `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows a random
    line from `quotes.txt`, split on `|` into `quote | reference` with the reference shown verbatim (see
