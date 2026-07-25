@@ -1,17 +1,10 @@
 [Variables]
 ; Al-Quran Quote - all tunables live here. Edit, then refresh the skin.
 
-; ---- Content (set at runtime by the Lua script; leave as-is) ----
-QuoteText=Loading verse...
-; VerseKey is the chapter:verse (for example 6:124), set at runtime (fetched, or the manual custom key).
-VerseKey=
-; RefText is the fully composed reference line the meter shows. The Lua composes it from ReferenceLabel,
-; VerseKey and the show toggles below, so the label can be hidden, the number can be hidden, and there is
-; no trailing space when only one is shown (a lone label stays centered). Set at runtime; leave as-is.
-RefText=
-; RefUseLabel records whether the current verse allows the label prefix (1 for online/custom, 0 for
-; offline verses whose reference is shown verbatim). Set at runtime; leave as-is.
-RefUseLabel=1
+; ---- Content ----
+; The displayed verse (QuoteText, VerseKey, RefText, RefUseLabel) is persisted in @Resources\LastVerse.inc,
+; which the main skin includes after this file, so the last verse is restored on restart. See that file
+; and Verse.lua's applyVerse.
 ; The label shown before the verse key (editable from the settings panel).
 ReferenceLabel=Al Quran
 ; ShowReferenceLabel / ShowVerseNumber toggle the two parts of the reference line (1 shows, 0 hides). They

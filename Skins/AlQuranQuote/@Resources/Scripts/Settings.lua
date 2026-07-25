@@ -921,6 +921,8 @@ function resetSettings()
 	for key, value in pairs(defaults) do
 		persist(key, value)
 	end
+	-- Clear the persisted verse so Reset shows a fresh verse after the refresh (first-run path).
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'VersePersisted', 0, SKIN:GetVariable('ROOTCONFIGPATH') .. '@Resources\\LastVerse.inc')
 	SKIN:Bang('!Refresh', mainConfigName)
 
 	local fontColorParts = splitNumbers(defaults.QuoteColor)

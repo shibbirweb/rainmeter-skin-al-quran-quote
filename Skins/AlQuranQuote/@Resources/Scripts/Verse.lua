@@ -32,8 +32,19 @@ function composeReferenceText(verseKey, useLabel)
 	return keyPart
 end
 
--- Set the quote text and verse key, compose the reference, then repaint. useLabel (default true) records
--- whether the label may prefix the reference, so refreshReference can recompose the same way later.
+-- Write the shown verse to LastVerse.inc so it is restored on the next Rainmeter start (that file is
+-- UTF-16, so Unicode verse text persists). VersePersisted flips to 1 so the load logic keeps it.
+local function persistLastVerse(quoteText, verseKey, useLabelFlag, refText)
+	local file = SKIN:GetVariable('@') .. 'LastVerse.inc'
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'QuoteText', quoteText, file)
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'VerseKey', verseKey, file)
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefText', refText, file)
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefUseLabel', useLabelFlag, file)
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'VersePersisted', 1, file)
+end
+
+-- Set the quote text and verse key, compose the reference, persist it, then repaint. useLabel (default
+-- true) records whether the label may prefix the reference, so refreshReference can recompose the same way.
 function applyVerse(quoteText, verseKey, useLabel)
 	if quoteText == nil then
 		quoteText = ''
@@ -48,10 +59,12 @@ function applyVerse(quoteText, verseKey, useLabel)
 	if not useLabel then
 		useLabelFlag = 0
 	end
+	local refText = composeReferenceText(verseKey, useLabel)
 	SKIN:Bang('!SetVariable', 'QuoteText', quoteText)
 	SKIN:Bang('!SetVariable', 'VerseKey', verseKey)
 	SKIN:Bang('!SetVariable', 'RefUseLabel', useLabelFlag)
-	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey, useLabel))
+	SKIN:Bang('!SetVariable', 'RefText', refText)
+	persistLastVerse(quoteText, verseKey, useLabelFlag, refText)
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end
@@ -62,7 +75,9 @@ end
 function refreshReference()
 	local verseKey = SKIN:GetVariable('VerseKey')
 	local useLabel = tonumber(SKIN:GetVariable('RefUseLabel')) == 1
-	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey, useLabel))
+	local refText = composeReferenceText(verseKey, useLabel)
+	SKIN:Bang('!SetVariable', 'RefText', refText)
+	SKIN:Bang('!WriteKeyValue', 'Variables', 'RefText', refText, SKIN:GetVariable('@') .. 'LastVerse.inc')
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end

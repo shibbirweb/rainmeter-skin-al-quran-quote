@@ -22,8 +22,9 @@ Skins/AlQuranQuote/           Skin folder (this layout is what the rmskin packag
                               from the skin's Variables.inc so editing the skin never restyles the panel.
   @Resources/
     Variables.inc             All tunables (colors, fonts, sizes, styles, RotateEvery, bounds). Themed here.
-    Scripts/RandomAyah.lua     Entry points: Initialize, Update, Online, Offline.
-    Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, repaints.
+    LastVerse.inc             Persisted last verse (UTF-16), restored on restart. Included after Variables.inc.
+    Scripts/RandomAyah.lua     Entry points: Initialize, Update, Online, Offline, nextVerse.
+    Scripts/Verse.lua          applyVerse(quote, ref): sets display vars, persists them, repaints.
     Scripts/QuoteFile.lua      readLines(path), parseLine(line): offline file I/O and parsing.
     Scripts/Settings.lua       Backs the settings panel: seed working vars on open, apply changes to the
                               main skin (no refetch), no self-refresh of the panel.
@@ -40,9 +41,10 @@ Data flow:
 1. `[MeasureQuran]` (WebParser) fetches
    `https://api.quran.com/api/v4/verses/random?language=en&translations=20`
    (translation resource 20 = Saheeh International). `verses/random` returns a new verse on every real
-   download, so no cache-buster is needed. It downloads once on load; rotation and the next-verse click
-   both fetch by running `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure MeasureQuran]`. See the
-   rotation note below.
+   download, so no cache-buster is needed. It is `Disabled=1` (no download on load, so the persisted verse
+   is kept); `nextVerse()` enables it and runs `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure
+   MeasureQuran]` on first run, rotation, the next-verse click / Change-verse button, and the online toggle.
+   See the persistence and rotation notes below.
 2. Child measures extract fields via `StringIndex` from the regex
    `(?siU)"verse_key":"(.*)".*"text":"(.*?)"`: `MeasureKey` (1) = verse_key, `MeasureEnglish` (2) =
    translation (HTML tags stripped via `RegExpSubstitute`). The text group is greedy (`(.*?)` under the
@@ -154,13 +156,22 @@ resolved in Lua and written to `PanelWidth` (auto -> `DefaultPanelWidth`, fixed 
 height cannot be resolved in Lua (auto height depends on the rendered verse), so the panel shape selects
 it with arithmetic: `#HeightAuto# * (autoFormula) + (1 - #HeightAuto#) * #FixedHeight#`.
 
+Verse persistence: the displayed verse is saved so a restart shows the SAME verse instead of refetching.
+`applyVerse` writes `QuoteText`/`VerseKey`/`RefText`/`RefUseLabel` and `VersePersisted=1` to
+`@Resources\LastVerse.inc` (a UTF-16 file, so Unicode verse text survives `WritePrivateProfileString`),
+which the main skin `@IncludeVariables2`s after `Variables.inc` so its saved values win on load. To stop the
+restored verse being overwritten, `[MeasureQuran]` is `Disabled=1` (no download on load); `nextVerse()`
+`!EnableMeasures` it before fetching. On load `Initialize` keeps the restored verse when `VersePersisted=1`
+and only fetches on first run (`VersePersisted=0`). Reset writes `VersePersisted=0` to `LastVerse.inc` so
+it shows a fresh verse after the refresh.
+
 Rotation is decoupled from the download so toggling rotation or changing the duration never refetches the
 displayed verse. `[MeasureRotateTick]` (a `Calc`, `DynamicVariables=1`) counts one per second and wraps to
 0 every `RotateEvery` seconds via `(MeasureRotateTick + 1) % #RotateEvery#`; when it hits 0 and
-`#AutoChange#` is 1 it fires `[!CommandMeasure MeasureQuran "Update"][!UpdateMeasure MeasureQuran]`.
-`Settings.lua`'s `applyRotation` persists `AutoChange`/`RotateEvery` and applies them live with
-`!SetVariable ... "AlQuranQuote"` (NO refresh); the tick reads both dynamically, so a change takes effect on
-the next tick. Only Reset uses `!Refresh` (which does refetch).
+`#AutoChange#` is 1 (and no custom verse) it fires `[!CommandMeasure MeasureRandom "nextVerse()"]`, which
+picks the source (online download / offline / custom). `Settings.lua`'s `applyRotation` persists
+`AutoChange`/`RotateEvery` and applies them live with `!SetVariable ... "AlQuranQuote"` (NO refresh); the
+tick reads both dynamically, so a change takes effect on the next tick. Only Reset uses `!Refresh`.
 
 The WebParser must keep updating for this to work, so it uses `UpdateRate=#DownloadOnDemandRate#` (a very
 large value), NOT `UpdateDivider=-1`. Why: `CommandMeasure "Update"` only resets the WebParser's internal

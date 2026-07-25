@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The skin now restores the last shown verse after a Rainmeter restart instead of refetching a new one. The
+  verse is saved to a UTF-16 `LastVerse.inc` (so Unicode text survives), `[MeasureQuran]` no longer
+  downloads on load (`Disabled=1`; it is enabled on demand), and the skin only fetches on first run.
 - Non-ASCII characters in verses (e.g. the `ā`/`ī` in "Allāh") no longer show as `?`/unknown. `RandomAyah.lua`
   is saved as UTF-16 LE with a BOM so Rainmeter treats it as Unicode and marshals verse text as UTF-8 across
   the Lua boundary. (The chosen font must have glyphs for the script; Georgia covers Latin.)
