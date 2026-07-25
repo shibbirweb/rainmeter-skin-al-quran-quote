@@ -20,7 +20,8 @@ SettingsLabelColor=175,182,193,255
 SettingsTextColor=235,235,235,255
 SettingsInactiveColor=150,156,166,255
 SettingsActiveColor=120,200,255,255
-SettingsInputBg=20,24,30,255
+; Input/clickable-value box background. Kept clearly lighter than SettingsBg so the fields stand out.
+SettingsInputBg=48,54,66,255
 SettingsFont=Segoe UI
 SettingsFontSize=11
 SettingsTitleSize=13
