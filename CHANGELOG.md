@@ -26,9 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   random Quran verse (Saheeh International English translation) with its reference.
 - Verses are fetched live from the quran.com API v4 `verses/random` endpoint over a direct connection
   (`ProxyServer=/none`), so proxy auto-detection (WPAD) cannot hang the download. When the network or the
-  request fails, an offline verse from the bundled `quotes.txt` is shown instead. Each line of that file is
-  `quote | reference` (split on the first `|`); the reference is shown verbatim, so it can be any text, not
-  just a Quran chapter:verse.
+  request fails, a verse from the bundled `quotes.txt` is shown instead, cycling through the file
+  sequentially. Each line is `quote | reference` (split on the first `|`); the reference is shown verbatim,
+  so it can be any text, not just a Quran chapter:verse.
 - Automatic rotation on a timer (default every 30 minutes), decoupled from the download so toggling
   rotation or changing the duration never refetches the current verse. A next-verse control by the
   reference fetches the next verse on demand.
@@ -50,8 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     verse is never overwritten.
   - Online fetch on/off: when off, load, rotation, and the next-verse control all draw from the offline
     `quotes.txt` instead of hitting the API.
-  - Open the offline fallback file (`quotes.txt`) in Notepad to add or edit your own fallback verses.
-  - Show or hide the settings icon on the skin, and a Reset to defaults.
+  - Open the offline fallback file (`quotes.txt`) in Notepad to add or edit your own fallback verses; edits
+    appear on the next verse change with no refresh (the file is re-read each time).
+  - A "Change verse" button to show the next verse from the settings panel (handy when the next-verse icon
+    is hidden).
+  - Show or hide the settings icon and the next-verse icon on the skin, and a Reset to defaults.
 - Appearance and reference changes apply to the running skin live (via `!SetVariable`) without refetching a
   verse; only Reset refreshes. The reference line is composed in Lua so a hidden part leaves no gap and a
   lone label stays centered.

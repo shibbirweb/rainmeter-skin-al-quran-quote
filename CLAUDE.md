@@ -50,9 +50,11 @@ Data flow:
    inside verses that contain quotation marks (e.g. 23:47) and truncate them. `Online()` then converts the
    API's `\"` and `\/` escapes back to `"` and `/`.
 3. On success `FinishAction` calls `Online()`, which reads the child measures and calls
-   `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows a random
-   line from `quotes.txt`, split on `|` into `quote | reference` with the reference shown verbatim (see
-   the reference note below). When `#CustomVerseEnabled#` is 1, both route to `applyCustomVerse()` instead.
+   `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows the NEXT
+   line of `quotes.txt` (a module-level `offlineIndex` advances and wraps, so offline verses cycle
+   sequentially), split on `|` into `quote | reference` with the reference shown verbatim (see the
+   reference note below). `Offline()` re-reads the file every call, so edits to `quotes.txt` appear on the
+   next verse change with no refresh. When `#CustomVerseEnabled#` is 1, both route to `applyCustomVerse()`.
 4. `applyVerse(quoteText, verseKey, useLabel)` sets `#QuoteText#`, `#VerseKey#` and `#RefUseLabel#`, then
    composes `#RefText#` (in `Verse.lua`'s `composeReferenceText`) from the label, the key and the two show
    toggles. The quote meter shows `#QuoteText#`; the reference meter shows `#RefText#`. Composing in Lua
@@ -114,7 +116,9 @@ background color/opacity and border opacity (plus manual inputs), an editable re
 checkboxes for the reference label and
 the verse number, a "use custom verse" checkbox with a custom-text input and optional sura/verse number
 inputs, a typed rotation duration, "auto" checkboxes for width and height (each revealing a fixed-value
-input when unchecked), an automatic-rotation checkbox, a show-settings-icon checkbox, and a Reset button.
+input when unchecked), an automatic-rotation checkbox, show-settings-icon and show-next-verse-icon
+checkboxes, a "Change verse" button (shows the next verse; useful when the icon is hidden), and a Reset
+button.
 Sliders are Shape meters (track + fill); click sets the value from
 `$MouseX:%$` (position as a percentage of the meter) and the scroll wheel nudges by a named step.
 Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
@@ -202,8 +206,12 @@ a Rainmeter `StringStyle` keyword (`Bold`, `Normal`, or `Italic`); the default i
 
 The settings icon on the quote window is hidden when `SettingsIconHidden=1` (its meter is
 `Hidden=#SettingsIconHidden#`); when hidden, the settings panel is reopened by loading `AlQuranQuote\Settings`
-from Rainmeter's Manage dialog. The verse is changed by a small next-verse control (a vector triangle) on
-the reference line, NOT by clicking the window (the panel has no click action; it stays draggable).
+from Rainmeter's Manage dialog. The verse is changed by a small next-verse control (a vector chevron) on
+the reference line, NOT by clicking the window (the panel has no click action; it stays draggable). That
+control is hidden while a custom verse is shown OR when `NextIconHidden=1`; its meter combines the two with
+`Hidden=(1 - (1 - #CustomVerseEnabled#) * (1 - #NextIconHidden#))` (Rainmeter's `Hidden` parses a
+parenthesized formula). When the icon is hidden, the settings Verse tab's "Change verse" button
+(`[!CommandMeasure MeasureRandom "nextVerse()" "AlQuranQuote"]`) changes the verse instead.
 
 ## Rules and conventions
 

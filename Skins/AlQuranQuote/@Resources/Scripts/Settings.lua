@@ -38,6 +38,7 @@ local defaults = {
 	PanelBorderOpacity = 25,
 	ReferenceLabel = 'Al Quran',
 	SettingsIconHidden = 0,
+	NextIconHidden = 0,
 	RotateEvery = 1800,
 	AutoChange = 1,
 	WidthAuto = 1,
@@ -335,6 +336,7 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
 	SKIN:Bang('!SetVariable', 'WorkReferenceLabel', state.referenceLabel)
 	SKIN:Bang('!SetVariable', 'SettingsIconHidden', state.iconHidden)
+	SKIN:Bang('!SetVariable', 'NextIconHidden', state.nextIconHidden)
 	SKIN:Bang('!SetVariable', 'FontColorR', fontColor.red)
 	SKIN:Bang('!SetVariable', 'FontColorG', fontColor.green)
 	SKIN:Bang('!SetVariable', 'FontColorB', fontColor.blue)
@@ -397,6 +399,7 @@ function loadSettings()
 		borderOpacity = clampRound(readNumber('PanelBorderOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
 		referenceLabel = SKIN:GetVariable('ReferenceLabel'),
 		iconHidden = tonumber(SKIN:GetVariable('SettingsIconHidden')) or 0,
+		nextIconHidden = tonumber(SKIN:GetVariable('NextIconHidden')) or 0,
 		fontColor = {
 			red = fontColorParts[1] or 240,
 			green = fontColorParts[2] or 240,
@@ -900,6 +903,18 @@ function toggleShowIcon()
 	updatePanel()
 end
 
+function toggleShowNextIcon()
+	local hidden = tonumber(SKIN:GetVariable('NextIconHidden'))
+	if hidden == 1 then
+		hidden = 0
+	else
+		hidden = 1
+	end
+	SKIN:Bang('!SetVariable', 'NextIconHidden', hidden)
+	applyAppearance('NextIconHidden', hidden)
+	updatePanel()
+end
+
 -- ---- Reset ----
 
 function resetSettings()
@@ -929,6 +944,7 @@ function resetSettings()
 		borderOpacity = defaults.PanelBorderOpacity,
 		referenceLabel = defaults.ReferenceLabel,
 		iconHidden = defaults.SettingsIconHidden,
+		nextIconHidden = defaults.NextIconHidden,
 		fontColor = {
 			red = fontColorParts[1],
 			green = fontColorParts[2],

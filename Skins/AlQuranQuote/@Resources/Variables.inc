@@ -89,6 +89,9 @@ SettingsIconHidden=0
 ; Next-verse control (small chevron by the reference that fetches the next verse).
 NextIconWidth=12
 NextIconHeight=14
+; NextIconHidden hides the next-verse chevron on the quote window when 1 (change the verse from the
+; settings Verse tab's "Change verse" button instead). Editable from the settings panel.
+NextIconHidden=0
 
 ; ---- Settings bounds ----
 ; Named limits the settings panel clamps numeric input to, so a bad value can never corrupt the skin.
