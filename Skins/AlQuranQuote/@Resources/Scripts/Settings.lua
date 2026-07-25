@@ -13,8 +13,10 @@ local mainConfigName = 'AlQuranQuote'
 
 -- Authoritative live state kept in Lua, so we never read back a variable we just set with a queued bang.
 local fontColor = { red = 240, green = 240, blue = 240, alpha = 255 }
+local refColor = { red = 205, green = 205, blue = 205, alpha = 200 }
 local backgroundColor = { red = 18, green = 22, blue = 28 }
 local fontSize = 13
+local refFontSize = 10
 local backgroundOpacity = 205
 local borderOpacity = 25
 local autoChange = 1
@@ -26,6 +28,10 @@ local defaults = {
 	QuoteSize = 13,
 	QuoteStyle = 'Normal',
 	QuoteColor = '240,240,240,255',
+	RefFont = 'Segoe UI',
+	RefSize = 10,
+	RefStyle = 'Normal',
+	RefColor = '205,205,205,200',
 	PanelColorRGB = '18,22,28',
 	PanelOpacity = 205,
 	PanelBorderRGB = '255,255,255',
@@ -148,6 +154,16 @@ local function applyFontColor()
 	updatePanel()
 end
 
+local function applyRefColor()
+	SKIN:Bang('!SetVariable', 'RefColorR', refColor.red)
+	SKIN:Bang('!SetVariable', 'RefColorG', refColor.green)
+	SKIN:Bang('!SetVariable', 'RefColorB', refColor.blue)
+	SKIN:Bang('!SetVariable', 'RefColorA', refColor.alpha)
+	local composed = refColor.red .. ',' .. refColor.green .. ',' .. refColor.blue .. ',' .. refColor.alpha
+	applyAppearance('RefColor', composed)
+	updatePanel()
+end
+
 local function applyBackgroundColor()
 	SKIN:Bang('!SetVariable', 'BgColorR', backgroundColor.red)
 	SKIN:Bang('!SetVariable', 'BgColorG', backgroundColor.green)
@@ -179,6 +195,25 @@ local function highlightStyle(styleKeyword)
 	SKIN:Bang('!SetVariable', 'BoldColor', boldColor)
 	SKIN:Bang('!SetVariable', 'RegularColor', regularColor)
 	SKIN:Bang('!SetVariable', 'ItalicColor', italicColor)
+end
+
+-- Set which reference-style button is highlighted as active.
+local function highlightRefStyle(styleKeyword)
+	local inactive = SKIN:GetVariable('SettingsInactiveColor')
+	local active = SKIN:GetVariable('SettingsActiveColor')
+	local boldColor = inactive
+	local regularColor = inactive
+	local italicColor = inactive
+	if styleKeyword == 'Bold' then
+		boldColor = active
+	elseif styleKeyword == 'Normal' then
+		regularColor = active
+	elseif styleKeyword == 'Italic' then
+		italicColor = active
+	end
+	SKIN:Bang('!SetVariable', 'RefBoldColor', boldColor)
+	SKIN:Bang('!SetVariable', 'RefRegularColor', regularColor)
+	SKIN:Bang('!SetVariable', 'RefItalicColor', italicColor)
 end
 
 -- Color the active tab label and dim the others.
@@ -271,10 +306,15 @@ local function seedWorkingState(state)
 	fontColor.green = state.fontColor.green
 	fontColor.blue = state.fontColor.blue
 	fontColor.alpha = state.fontColor.alpha
+	refColor.red = state.refColor.red
+	refColor.green = state.refColor.green
+	refColor.blue = state.refColor.blue
+	refColor.alpha = state.refColor.alpha
 	backgroundColor.red = state.bgColor.red
 	backgroundColor.green = state.bgColor.green
 	backgroundColor.blue = state.bgColor.blue
 	fontSize = state.fontSizeValue
+	refFontSize = state.refFontSizeValue
 	backgroundOpacity = state.opacity
 	borderOpacity = state.borderOpacity
 	autoChange = state.autoChangeValue
@@ -283,6 +323,13 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'WorkFontFamily', state.fontFamily)
 	SKIN:Bang('!SetVariable', 'WorkFontSize', fontSize)
 	SKIN:Bang('!SetVariable', 'WorkStyle', state.style)
+	SKIN:Bang('!SetVariable', 'WorkRefFontFamily', state.refFontFamily)
+	SKIN:Bang('!SetVariable', 'WorkRefFontSize', refFontSize)
+	SKIN:Bang('!SetVariable', 'WorkRefStyle', state.refStyle)
+	SKIN:Bang('!SetVariable', 'RefColorR', refColor.red)
+	SKIN:Bang('!SetVariable', 'RefColorG', refColor.green)
+	SKIN:Bang('!SetVariable', 'RefColorB', refColor.blue)
+	SKIN:Bang('!SetVariable', 'RefColorA', refColor.alpha)
 	SKIN:Bang('!SetVariable', 'WorkDuration', rotateEvery)
 	SKIN:Bang('!SetVariable', 'WorkOpacity', backgroundOpacity)
 	SKIN:Bang('!SetVariable', 'WorkBorderOpacity', borderOpacity)
@@ -309,6 +356,7 @@ local function seedWorkingState(state)
 	SKIN:Bang('!SetVariable', 'WorkVerseNumber', state.verseNumber)
 
 	highlightStyle(state.style)
+	highlightRefStyle(state.refStyle)
 
 	SKIN:Bang('!HideMeterGroup', 'FontList')
 	SKIN:Bang('!SetVariable', 'FontListVisible', 0)
@@ -329,11 +377,21 @@ end
 -- Seed the panel from the parent config's current values (called on open).
 function loadSettings()
 	local fontColorParts = splitNumbers(SKIN:GetVariable('QuoteColor'))
+	local refColorParts = splitNumbers(SKIN:GetVariable('RefColor'))
 	local backgroundColorParts = splitNumbers(SKIN:GetVariable('PanelColorRGB'))
 	seedWorkingState({
 		fontFamily = SKIN:GetVariable('QuoteFont'),
 		fontSizeValue = clampRound(readNumber('QuoteSize'), readNumber('MinQuoteSize'), readNumber('MaxQuoteSize')),
 		style = SKIN:GetVariable('QuoteStyle'),
+		refFontFamily = SKIN:GetVariable('RefFont'),
+		refFontSizeValue = clampRound(readNumber('RefSize'), readNumber('MinQuoteSize'), readNumber('MaxQuoteSize')),
+		refStyle = SKIN:GetVariable('RefStyle'),
+		refColor = {
+			red = refColorParts[1] or 205,
+			green = refColorParts[2] or 205,
+			blue = refColorParts[3] or 205,
+			alpha = refColorParts[4] or 200,
+		},
 		duration = readNumber('RotateEvery'),
 		opacity = clampRound(readNumber('PanelOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
 		borderOpacity = clampRound(readNumber('PanelBorderOpacity'), readNumber('MinPanelOpacity'), readNumber('MaxPanelOpacity')),
@@ -368,23 +426,50 @@ end
 
 -- ---- Font family (list + manual) ----
 
-function toggleFontList()
+-- The curated font list is shared by the Quote (left column) and Reference (right column) family rows.
+-- target is 'quote' or 'ref'; it decides which font a pick applies to and which column the overlay opens
+-- under. Clicking the same row again closes it.
+function toggleFontList(target)
 	local visible = tonumber(SKIN:GetVariable('FontListVisible'))
-	if visible == 1 then
+	local currentTarget = SKIN:GetVariable('FontListTarget')
+	if visible == 1 and currentTarget == target then
 		SKIN:Bang('!HideMeterGroup', 'FontList')
 		SKIN:Bang('!SetVariable', 'FontListVisible', 0)
 	else
+		SKIN:Bang('!SetVariable', 'FontListTarget', target)
+		if target == 'ref' then
+			SKIN:Bang('!SetVariable', 'FontListX', SKIN:GetVariable('Col2X'))
+		else
+			SKIN:Bang('!SetVariable', 'FontListX', SKIN:GetVariable('Pad'))
+		end
 		SKIN:Bang('!ShowMeterGroup', 'FontList')
 		SKIN:Bang('!SetVariable', 'FontListVisible', 1)
 	end
 	SKIN:Bang('!Redraw')
 end
 
+-- A font list item was clicked; apply it to whichever family row opened the list.
 function setFont(fontName)
+	if SKIN:GetVariable('FontListTarget') == 'ref' then
+		setRefFont(fontName)
+	else
+		setQuoteFont(fontName)
+	end
+end
+
+function setQuoteFont(fontName)
 	SKIN:Bang('!SetVariable', 'WorkFontFamily', fontName)
 	SKIN:Bang('!HideMeterGroup', 'FontList')
 	SKIN:Bang('!SetVariable', 'FontListVisible', 0)
 	applyAppearance('QuoteFont', fontName)
+	updatePanel()
+end
+
+function setRefFont(fontName)
+	SKIN:Bang('!SetVariable', 'WorkRefFontFamily', fontName)
+	SKIN:Bang('!HideMeterGroup', 'FontList')
+	SKIN:Bang('!SetVariable', 'FontListVisible', 0)
+	applyAppearance('RefFont', fontName)
 	updatePanel()
 end
 
@@ -459,6 +544,74 @@ function setFontColorManual(text)
 		fontColor.alpha = clampRound(parts[4], 0, 255)
 	end
 	applyFontColor()
+end
+
+-- ---- Reference font: size (slider), style (buttons), color (sliders + manual). Mirrors the quote's. ----
+
+function setRefFontSizePercent(percent)
+	local minimum = readNumber('MinQuoteSize')
+	local maximum = readNumber('MaxQuoteSize')
+	refFontSize = clampRound(minimum + (maximum - minimum) * tonumber(percent) / 100, minimum, maximum)
+	SKIN:Bang('!SetVariable', 'WorkRefFontSize', refFontSize)
+	applyAppearance('RefSize', refFontSize)
+	updatePanel()
+end
+
+function nudgeRefFontSize(step)
+	local minimum = readNumber('MinQuoteSize')
+	local maximum = readNumber('MaxQuoteSize')
+	refFontSize = clampRound(refFontSize + step, minimum, maximum)
+	SKIN:Bang('!SetVariable', 'WorkRefFontSize', refFontSize)
+	applyAppearance('RefSize', refFontSize)
+	updatePanel()
+end
+
+function setRefStyle(styleKeyword)
+	SKIN:Bang('!SetVariable', 'WorkRefStyle', styleKeyword)
+	highlightRefStyle(styleKeyword)
+	applyAppearance('RefStyle', styleKeyword)
+	updatePanel()
+end
+
+function setRefColorChannel(component, percent)
+	local value = channelFromPercent(percent)
+	if component == 'r' then
+		refColor.red = value
+	elseif component == 'g' then
+		refColor.green = value
+	elseif component == 'b' then
+		refColor.blue = value
+	elseif component == 'a' then
+		refColor.alpha = value
+	end
+	applyRefColor()
+end
+
+function nudgeRefColorChannel(component, step)
+	if component == 'r' then
+		refColor.red = clampRound(refColor.red + step, 0, 255)
+	elseif component == 'g' then
+		refColor.green = clampRound(refColor.green + step, 0, 255)
+	elseif component == 'b' then
+		refColor.blue = clampRound(refColor.blue + step, 0, 255)
+	elseif component == 'a' then
+		refColor.alpha = clampRound(refColor.alpha + step, 0, 255)
+	end
+	applyRefColor()
+end
+
+function setRefColorManual(text)
+	local parts = splitNumbers(text)
+	if #parts < 3 then
+		return
+	end
+	refColor.red = clampRound(parts[1], 0, 255)
+	refColor.green = clampRound(parts[2], 0, 255)
+	refColor.blue = clampRound(parts[3], 0, 255)
+	if parts[4] ~= nil then
+		refColor.alpha = clampRound(parts[4], 0, 255)
+	end
+	applyRefColor()
 end
 
 -- ---- Background color channels (sliders) + manual R,G,B entry ----
@@ -756,11 +909,21 @@ function resetSettings()
 	SKIN:Bang('!Refresh', mainConfigName)
 
 	local fontColorParts = splitNumbers(defaults.QuoteColor)
+	local refColorParts = splitNumbers(defaults.RefColor)
 	local backgroundColorParts = splitNumbers(defaults.PanelColorRGB)
 	seedWorkingState({
 		fontFamily = defaults.QuoteFont,
 		fontSizeValue = defaults.QuoteSize,
 		style = defaults.QuoteStyle,
+		refFontFamily = defaults.RefFont,
+		refFontSizeValue = defaults.RefSize,
+		refStyle = defaults.RefStyle,
+		refColor = {
+			red = refColorParts[1],
+			green = refColorParts[2],
+			blue = refColorParts[3],
+			alpha = refColorParts[4],
+		},
 		duration = defaults.RotateEvery,
 		opacity = defaults.PanelOpacity,
 		borderOpacity = defaults.PanelBorderOpacity,

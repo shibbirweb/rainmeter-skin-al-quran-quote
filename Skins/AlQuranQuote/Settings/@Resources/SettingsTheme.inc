@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=424
+SettingsHeight=436
 Col1X=16
 Col2X=316
 Pad=16
@@ -31,6 +31,10 @@ SliderChannelLabelX=16
 SliderX=34
 SliderWidth=210
 SliderValueX=284
+; Right-column mirror of the slider X positions (Col2X origin) for the Reference controls on the Text tab.
+SliderChannelLabelX2=316
+SliderX2=334
+SliderValueX2=584
 SliderH=10
 SliderYOffset=3
 SliderTrackColor=60,66,76,255
@@ -55,6 +59,8 @@ CloseBoxSize=10
 PreviewX=210
 PreviewW=74
 PreviewH=16
+; Right-column color preview X for the Reference color (Col2X origin).
+PreviewX2=510
 
 ; ---- Checkboxes and reset button ----
 CheckboxSize=14
@@ -84,11 +90,15 @@ Tab3Color=150,156,166,255
 ContentTopY=78
 
 ; ---- Block base-Y positions (each tab is two columns, each column stacks from ContentTopY) ----
-; Tab 1 (Text): left column = size + color (sliders); right column = family + style.
-SizeBaseY=78
-FontColorBaseY=126
+; Tab 1 (Text): left column = Quote (family, size, style, color); right column = Reference (same set).
 FamilyBaseY=78
-StyleBaseY=152
+SizeBaseY=152
+StyleBaseY=200
+FontColorBaseY=248
+RefFamilyBaseY=78
+RefSizeBaseY=152
+RefStyleBaseY=200
+RefColorBaseY=248
 ; Tab 2 (Panel): left column = background color + background/border opacity (sliders); right column =
 ; width + height + settings icon.
 BgColorBaseY=78
@@ -111,7 +121,7 @@ SuraNumberBaseY=174
 VerseNumberBaseY=222
 OpenFallbackBaseY=270
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs).
-ResetBaseY=380
+ResetBaseY=394
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
 FontListTop=116
@@ -131,7 +141,11 @@ Font9=Tahoma
 Font10=Trebuchet MS
 
 ; ---- Working state (seeded from the skin's current values by Settings.lua on open) ----
+; The curated font list is shared by the Quote and Reference family rows: FontListTarget records which one
+; a click applies to, and FontListX places the overlay under the clicked row (left or right column).
 FontListVisible=0
+FontListTarget=quote
+FontListX=16
 WorkFontFamily=Georgia
 WorkFontSize=13
 WorkStyle=Italic
@@ -152,3 +166,14 @@ BgColorB=28
 BoldColor=150,156,166,255
 RegularColor=150,156,166,255
 ItalicColor=150,156,166,255
+; Reference font working state (mirrors the quote's).
+WorkRefFontFamily=Segoe UI
+WorkRefFontSize=10
+WorkRefStyle=Normal
+RefColorR=205
+RefColorG=205
+RefColorB=205
+RefColorA=200
+RefBoldColor=150,156,166,255
+RefRegularColor=150,156,166,255
+RefItalicColor=150,156,166,255

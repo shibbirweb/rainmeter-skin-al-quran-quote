@@ -103,10 +103,15 @@ same config and would replace the main panel instead. The panel reads two variab
 parent `@Resources\Variables.inc` via `#ROOTCONFIGPATH#` (only to seed the controls with current values).
 Keeping the panel's look in its own file is deliberate: editing the skin never restyles the panel.
 
-Controls: a click-to-open curated font list (plus a manual "type a font name" input), sliders for font
-size and for each color channel (font color R/G/B/A, background R/G/B), a range slider for background
-opacity (plus manual inputs for font color R,G,B,A, background R,G,B, and opacity), a border-opacity slider,
-three buttons for font style, an editable reference label, show/hide checkboxes for the reference label and
+Controls: the Text tab has a full font control set for BOTH the Quote (left column) and the Reference
+(right column): a click-to-open curated font list (plus a manual "type a font name" input), a font-size
+slider, three font-style buttons (Bold / Regular / Italic), and an R/G/B/A color picker (preview + four
+sliders + manual entry). The quote applies to `QuoteFont`/`QuoteSize`/`QuoteStyle`/`QuoteColor`, the
+reference to `RefFont`/`RefSize`/`RefStyle`/`RefColor`; the Lua functions mirror each other
+(`setFont`/`setRefFont`, `setStyle`/`setRefStyle`, `setFontColorChannel`/`setRefColorChannel`, etc.) and
+the single font-list overlay is shared via `FontListTarget`/`FontListX`. Other controls: a range slider for
+background color/opacity and border opacity (plus manual inputs), an editable reference label, show/hide
+checkboxes for the reference label and
 the verse number, a "use custom verse" checkbox with a custom-text input and optional sura/verse number
 inputs, a typed rotation duration, "auto" checkboxes for width and height (each revealing a fixed-value
 input when unchecked), an automatic-rotation checkbox, a show-settings-icon checkbox, and a Reset button.
@@ -115,20 +120,24 @@ Sliders are Shape meters (track + fill); click sets the value from
 Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
 near-transparent fill so the whole box is clickable. Reveal-on-uncheck inputs use the `WidthInput` /
 `HeightInput` groups shown/hidden from Lua. Live state lives in settings-owned working variables
-(`WorkFontSize`, `FontColorR..A`, `BgColorR..B`, `WorkOpacity`, `WorkFontFamily`, `WorkDuration`,
-`WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`, `WorkCustomText`, `WorkSuraNumber`,
-`WorkVerseNumber`) plus the shared toggles `ShowReferenceLabel`/`ShowVerseNumber`/`CustomVerseEnabled`,
+(`WorkFontSize`, `FontColorR..A`, `WorkFontFamily`, `WorkStyle`, and the reference mirror
+`WorkRefFontSize`, `RefColorR..A`, `WorkRefFontFamily`, `WorkRefStyle`; plus `BgColorR..B`, `WorkOpacity`,
+`WorkDuration`, `WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`, `WorkCustomText`,
+`WorkSuraNumber`, `WorkVerseNumber`) plus the shared toggles
+`ShowReferenceLabel`/`ShowVerseNumber`/`CustomVerseEnabled`,
 that `Settings.lua` seeds on open. The panel is split into three tabs (Text / Panel / Verse) so it stays
 short; each content meter is in a `Tab1`/`Tab2`/`Tab3` group (multiple groups joined with `|`, e.g.
 `Group=Live | Tab1`), `setTab(n)` hides the other two groups and shows the active one, and Tab2/Tab3 meters
 start `Hidden=1` so only Tab1 shows on open. The font-list overlay and the reveal-on-uncheck width/height
 inputs are NOT in a Tab group; `setTab` hides them explicitly (and re-shows width/height on the Panel tab
 only when their auto box is unchecked) so they never appear on the wrong tab. Within a tab the controls sit
-in two columns: the left column (X=`Pad`) holds the slider-based controls, whose X positions are
-width-relative, and the right column (X=`Col2X`) holds the flat controls (labels, inputs, checkboxes,
-style buttons). Each column is an independent stack of base-Y values in `SettingsTheme.inc` starting from
-`ContentTopY`; adding a control means recomputing the base-Y of the ones below it in the same column and,
-if it grows the tallest column across all tabs, `ResetBaseY` and `SettingsHeight`.
+in two columns with independent base-Y stacks (starting from `ContentTopY`) in `SettingsTheme.inc`. The
+Text tab groups by role: Quote in the left column (X=`Pad`, using `SliderX`/`SliderValueX`/`PreviewX`) and
+Reference in the right column (X=`Col2X`, using the `*X2` mirror metrics `SliderX2`/`SliderValueX2`/
+`SliderChannelLabelX2`/`PreviewX2`), so both columns hold sliders. The Panel and Verse tabs instead keep
+slider-based controls on the left and flat controls on the right. Adding a control means recomputing the
+base-Y of the ones below it in the same column and, if it grows the tallest column across all tabs,
+`ResetBaseY` and `SettingsHeight`.
 
 Apply path (in `Settings.lua`): on any change it writes the value to the parent `Variables.inc` with
 `!WriteKeyValue`, then applies it to the running main skin. Appearance changes (font, size, style, colors,

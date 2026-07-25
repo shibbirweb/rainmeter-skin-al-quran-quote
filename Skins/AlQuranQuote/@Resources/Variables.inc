@@ -63,13 +63,14 @@ Radius=14
 IconGap=6
 
 ; ---- Theme ----
-; Most of these are editable from the settings panel. RefFont/RefSize/RefColor stay fixed.
+; All of these are editable from the settings panel (Text tab: Quote on the left, Reference on the right).
 QuoteFont=Georgia
 RefFont=Segoe UI
 QuoteSize=13
 RefSize=10
-; QuoteStyle is a Rainmeter StringStyle keyword: Bold, Normal (Regular), or Italic. Default is Regular.
+; QuoteStyle/RefStyle are Rainmeter StringStyle keywords: Bold, Normal (Regular), or Italic. Default Regular.
 QuoteStyle=Normal
+RefStyle=Normal
 QuoteColor=240,240,240,255
 RefColor=205,205,205,200
 ; Background color and border are each split into RGB and opacity so color and opacity change on their own.

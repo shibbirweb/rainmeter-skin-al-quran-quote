@@ -35,10 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings panel (opened from an icon on the skin) to change appearance and behavior without editing
   files; changes save to `Variables.inc` and apply immediately. It is organized into three tabs
   (Text / Panel / Verse), each laid out in two columns:
-  - Font family (a curated clickable list plus a type-any-font input), a size slider, and style buttons
-    (Bold / Regular / Italic).
-  - Font color and background color via R/G/B(/A) sliders with a live preview swatch; colors and opacity
-    can also be typed directly.
+  - Separate font controls for the Quote (left column) and the Reference (right column) on the Text tab,
+    each with font family (a curated clickable list plus a type-any-font input), a size slider, style
+    buttons (Bold / Regular / Italic), and an R/G/B/A color picker with a live preview swatch.
+  - Background color and opacity via R/G/B sliders with a live preview swatch; colors and opacity can also
+    be typed directly.
   - Background opacity and border opacity sliders.
   - Panel width and height: automatic, or a fixed pixel value.
   - Automatic rotation on/off and the change duration (seconds between verses).
