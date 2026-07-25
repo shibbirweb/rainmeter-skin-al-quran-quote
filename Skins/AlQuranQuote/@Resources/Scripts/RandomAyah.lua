@@ -79,8 +79,9 @@ function Online()
 	applyVerse(englishTranslation, verseKey)
 end
 
--- Fall back to a random line from @Resources\quotes.txt (unless custom mode is on). The bundled reference
--- is like "Quran X:Y"; take just the chapter:verse so the editable label is what shows in front of it.
+-- Fall back to a random line from @Resources\quotes.txt (unless custom mode is on). Each line is
+-- "quote | reference"; the reference is shown verbatim as the whole reference (useLabel = false), so the
+-- user can write any reference text, not just a Quran chapter:verse.
 function Offline()
 	if customVerseEnabled() then
 		applyCustomVerse()
@@ -92,11 +93,7 @@ function Offline()
 	end
 	local randomIndex = math.random(#offlineLines)
 	local quoteText, reference = parseLine(offlineLines[randomIndex])
-	local verseKey = reference:match('%d+:%d+')
-	if verseKey == nil then
-		verseKey = reference
-	end
-	applyVerse(quoteText, verseKey)
+	applyVerse(quoteText, reference, false)
 end
 
 -- Called by the settings panel after it changes a reference or custom variable. Recomposes the display

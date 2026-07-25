@@ -9,6 +9,9 @@ VerseKey=
 ; VerseKey and the show toggles below, so the label can be hidden, the number can be hidden, and there is
 ; no trailing space when only one is shown (a lone label stays centered). Set at runtime; leave as-is.
 RefText=
+; RefUseLabel records whether the current verse allows the label prefix (1 for online/custom, 0 for
+; offline verses whose reference is shown verbatim). Set at runtime; leave as-is.
+RefUseLabel=1
 ; The label shown before the verse key (editable from the settings panel).
 ReferenceLabel=Al Quran
 ; ShowReferenceLabel / ShowVerseNumber toggle the two parts of the reference line (1 shows, 0 hides). They

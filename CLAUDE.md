@@ -48,14 +48,17 @@ Data flow:
    translation (HTML tags stripped via `RegExpSubstitute`).
 3. On success `FinishAction` calls `Online()`, which reads the child measures and calls
    `applyVerse(english, verseKey)`. On error, `On*ErrorAction` calls `Offline()`, which shows a random
-   line from `quotes.txt` (the verse key is extracted from the bundled reference with `%d+:%d+`). When
-   `#CustomVerseEnabled#` is 1, both route to `applyCustomVerse()` instead (see custom-verse note below).
-4. `applyVerse` sets `#QuoteText#` and `#VerseKey#`, then composes `#RefText#` (in `Verse.lua`'s
-   `composeReferenceText`) from the label, the key and the two show toggles. The quote meter shows
-   `#QuoteText#`; the reference meter shows `#RefText#`. Composing in Lua (not `#ReferenceLabel# #VerseKey#`
-   in the meter) lets either part be hidden and drops the trailing space so a lone label stays centered.
-   The settings panel changes the label/toggles/custom fields and then calls `refreshDisplay()` on the
-   main skin (via cross-config `!CommandMeasure`), which recomposes without refetching.
+   line from `quotes.txt`, split on `|` into `quote | reference` with the reference shown verbatim (see
+   the reference note below). When `#CustomVerseEnabled#` is 1, both route to `applyCustomVerse()` instead.
+4. `applyVerse(quoteText, verseKey, useLabel)` sets `#QuoteText#`, `#VerseKey#` and `#RefUseLabel#`, then
+   composes `#RefText#` (in `Verse.lua`'s `composeReferenceText`) from the label, the key and the two show
+   toggles. The quote meter shows `#QuoteText#`; the reference meter shows `#RefText#`. Composing in Lua
+   (not `#ReferenceLabel# #VerseKey#` in the meter) lets either part be hidden and drops the trailing space
+   so a lone label stays centered. `useLabel` is true for online and custom verses (label may prefix the
+   key) and false for offline verses, whose reference from `quotes.txt` is shown verbatim with no label;
+   `refreshReference` reads `#RefUseLabel#` so a later toggle change recomposes the same way. The settings
+   panel changes the label/toggles/custom fields and then calls `refreshDisplay()` on the main skin (via
+   cross-config `!CommandMeasure`), which recomposes without refetching.
 
 Gotcha: do NOT put `DynamicVariables=1` on the `[MeasureQuran]` WebParser parent. WebParser downloads
 on a background thread; with `DynamicVariables=1` it re-reads the URL every update and the download
@@ -221,4 +224,7 @@ the reference line, NOT by clicking the window (the panel has no click action; i
 
 ## Add an offline verse
 
-Append a line to `@Resources/quotes.txt`: `English translation text | Quran X:Y`.
+Append a line to `@Resources/quotes.txt` in the form `quote | reference`. The line is split on the first
+`|`: the left side is the quote, the right side is the reference, shown verbatim (no label prefix, not
+parsed). For example `Alhumdulillah | ABC DE` shows "Alhumdulillah" with the reference "ABC DE". Use the
+"Open file in Notepad" control on the settings Verse tab to edit this file.

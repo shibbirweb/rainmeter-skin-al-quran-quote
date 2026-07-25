@@ -4,8 +4,13 @@
 -- string (not "#ReferenceLabel# #VerseKey#" in the meter) so either part can be hidden and a lone label
 -- has no trailing space, which keeps it centered when there is no number. Global so RandomAyah.lua can use
 -- it too. The verseKey is passed in (never read back right after it is set with a queued bang).
-function composeReferenceText(verseKey)
-	local showLabel = tonumber(SKIN:GetVariable('ShowReferenceLabel')) == 1
+-- useLabel is false for offline verses: their reference (the text after "|" in quotes.txt) is shown
+-- verbatim as the whole reference, with no "Al Quran" label in front. Online and custom verses pass true.
+function composeReferenceText(verseKey, useLabel)
+	if useLabel == nil then
+		useLabel = true
+	end
+	local showLabel = useLabel and (tonumber(SKIN:GetVariable('ShowReferenceLabel')) == 1)
 	local showNumber = tonumber(SKIN:GetVariable('ShowVerseNumber')) == 1
 
 	local labelPart = ''
@@ -27,27 +32,37 @@ function composeReferenceText(verseKey)
 	return keyPart
 end
 
--- Set the quote text and verse key, compose the reference, then repaint.
-function applyVerse(quoteText, verseKey)
+-- Set the quote text and verse key, compose the reference, then repaint. useLabel (default true) records
+-- whether the label may prefix the reference, so refreshReference can recompose the same way later.
+function applyVerse(quoteText, verseKey, useLabel)
 	if quoteText == nil then
 		quoteText = ''
 	end
 	if verseKey == nil then
 		verseKey = ''
 	end
+	if useLabel == nil then
+		useLabel = true
+	end
+	local useLabelFlag = 1
+	if not useLabel then
+		useLabelFlag = 0
+	end
 	SKIN:Bang('!SetVariable', 'QuoteText', quoteText)
 	SKIN:Bang('!SetVariable', 'VerseKey', verseKey)
-	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey))
+	SKIN:Bang('!SetVariable', 'RefUseLabel', useLabelFlag)
+	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey, useLabel))
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end
 
 -- Recompose the reference from the CURRENT verse key without touching the quote, used when only the label
--- or a show toggle changed so the displayed verse must not move. VerseKey is read here (it was set on a
--- previous call, not in this one, so the value is current).
+-- or a show toggle changed so the displayed verse must not move. VerseKey and RefUseLabel are read here
+-- (both were set on a previous call, not in this one, so the values are current).
 function refreshReference()
 	local verseKey = SKIN:GetVariable('VerseKey')
-	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey))
+	local useLabel = tonumber(SKIN:GetVariable('RefUseLabel')) == 1
+	SKIN:Bang('!SetVariable', 'RefText', composeReferenceText(verseKey, useLabel))
 	SKIN:Bang('!UpdateMeter', '*')
 	SKIN:Bang('!Redraw')
 end

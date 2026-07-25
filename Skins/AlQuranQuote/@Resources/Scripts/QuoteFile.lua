@@ -1,5 +1,5 @@
 -- QuoteFile.lua : read and parse the offline quotes file.
--- Each line is "English text | Quran X:Y".
+-- Each line is "quote | reference"; the reference (anything after the first "|") is shown verbatim.
 
 -- Return every non-blank line of the file at `filePath` as a table.
 function readLines(filePath)
