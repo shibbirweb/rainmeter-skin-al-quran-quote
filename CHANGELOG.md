@@ -57,9 +57,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Online fetch on/off (off by default): when off, load, rotation, and the next-verse control all draw
     from the offline `quotes.txt` instead of hitting the API.
   - Online verse language: a click-to-open list of popular languages (English default), including Arabic
-    (the original ayah via `text_uthmani`), plus a "type a translation id" input to use any of the ~126
-    quran.com translations. Non-Latin scripts (Arabic, Bengali, Urdu, ...) need a Quote font with their
-    glyphs.
+    (the original ayah via `text_uthmani`), plus a "type a translation id" input (with a "browse all
+    translation ids" link to the quran.com API) to use any of the ~126 quran.com translations. Non-Latin
+    scripts (Arabic, Bengali, Urdu, ...) need a Quote font with their glyphs.
   - Open the offline verses file (`quotes.txt`) in Notepad to add or edit your own offline verses; edits
     appear on the next verse change with no refresh (the file is re-read each time).
   - A "Change verse" button to show the next verse from the settings panel (handy when the next-verse icon
