@@ -1,0 +1,69 @@
+name: Publish Wiki
+
+# Publishes the Markdown pages in the repo's wiki/ folder to the GitHub Wiki. The wiki/ folder is the
+# single source of truth: edit those files and push, and this workflow mirrors them into the wiki so the
+# published pages always match the repo. It runs whenever a wiki/ file (or this workflow) changes on the
+# default branch, and can also be started by hand from the Actions tab.
+#
+# One-time setup: a repo's wiki does not exist until it has one page. Open the Wiki tab on GitHub and
+# create any first page once; after that this workflow keeps the wiki in sync automatically.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/publish-wiki.yml'
+  workflow_dispatch:
+
+# Only one publish at a time, so two quick pushes cannot race each other's push to the wiki repo.
+concurrency:
+  group: publish-wiki
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync wiki/ into the GitHub Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          wiki_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          wiki_dir="$(mktemp -d)"
+
+          # The wiki is a separate git repo. It exists only after the first page is created in the Wiki tab.
+          if ! git clone --depth 1 "$wiki_url" "$wiki_dir" 2>/dev/null; then
+            echo "::error::Could not clone the wiki repository. Create the first wiki page once in the repo's Wiki tab to initialize it, then re-run this workflow."
+            exit 1
+          fi
+
+          # Replace the wiki's current pages with the current wiki/ contents (but keep its .git history).
+          find "$wiki_dir" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -R wiki/. "$wiki_dir"/
+          # README.md documents the wiki/ folder for repo contributors; it is not a wiki page.
+          rm -f "$wiki_dir/README.md"
+
+          cd "$wiki_dir"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Wiki already up to date; nothing to publish."
+            exit 0
+          fi
+
+          git commit -m "docs: sync wiki from ${GITHUB_SHA::7}"
+          git push origin HEAD
+          echo "Wiki published."

@@ -1,0 +1,1 @@
+Al-Quran Quote - a free, open-source Rainmeter skin - MIT licence - [Report an issue](https://github.com/shibbirweb/rainmeter-skin-al-quran-quote/issues) - Verse data by [quran.com](https://quran.com)
