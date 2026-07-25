@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=436
+SettingsHeight=496
 Col1X=16
 Col2X=316
 Pad=16
@@ -108,14 +108,15 @@ WidthBaseY=78
 HeightBaseY=148
 ShowIconBaseY=218
 ShowNextIconBaseY=266
-; Tab 3 (Verse): left column = rotation + duration + online fetch + reference label + show toggles; right
-; column = custom verse + custom text + sura + verse + open offline verses file.
+; Tab 3 (Verse): left column = rotation + duration + online fetch + online-fetch language + reference label
+; + show toggles; right column = custom verse + custom text + sura + verse + open offline verses + change.
 RotateToggleBaseY=78
 DurationBaseY=126
 OnlineFetchBaseY=174
-ReferenceLabelBaseY=222
-ShowReferenceLabelBaseY=270
-ShowVerseNumberBaseY=318
+LanguageBaseY=222
+ReferenceLabelBaseY=296
+ShowReferenceLabelBaseY=344
+ShowVerseNumberBaseY=392
 CustomVerseBaseY=78
 CustomTextBaseY=126
 SuraNumberBaseY=174
@@ -123,7 +124,7 @@ VerseNumberBaseY=222
 OfflineVersesBaseY=270
 ChangeVerseBaseY=318
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs).
-ResetBaseY=394
+ResetBaseY=454
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
 FontListTop=116
@@ -142,12 +143,63 @@ Font8=Verdana
 Font9=Tahoma
 Font10=Trebuchet MS
 
+; ---- Curated online language list (overlay on the Verse tab, below the Language row) ----
+; Each entry is a display name, the quran.com `language` code, and the `translations` resource id. Any
+; other translation is reachable via the "type a translation id" input. Reuses FontItemH/ItemInset/ListVPad.
+; The 13-item list is tall, so it opens at this fixed Y (a modal overlay covering the tab's lower controls)
+; rather than directly under the Language row, so it always fits inside the panel.
+LangListTop=146
+LangCount=13
+; Trans is a translation resource id, except the Arabic sentinel "uthmani": Settings.lua then fetches the
+; original ayah (fields=text_uthmani) instead of a translation.
+Lang1Name=English (Saheeh Intl.)
+Lang1Code=en
+Lang1Trans=20
+Lang2Name=Bengali
+Lang2Code=bn
+Lang2Trans=161
+Lang3Name=Urdu
+Lang3Code=ur
+Lang3Trans=234
+Lang4Name=Hindi
+Lang4Code=hi
+Lang4Trans=122
+Lang5Name=Indonesian
+Lang5Code=id
+Lang5Trans=134
+Lang6Name=Turkish
+Lang6Code=tr
+Lang6Trans=210
+Lang7Name=French
+Lang7Code=fr
+Lang7Trans=136
+Lang8Name=Spanish
+Lang8Code=es
+Lang8Trans=83
+Lang9Name=German
+Lang9Code=de
+Lang9Trans=208
+Lang10Name=Russian
+Lang10Code=ru
+Lang10Trans=78
+Lang11Name=Persian
+Lang11Code=fa
+Lang11Trans=135
+Lang12Name=Malay
+Lang12Code=ms
+Lang12Trans=39
+Lang13Name=Arabic (original)
+Lang13Code=ar
+Lang13Trans=uthmani
+
 ; ---- Working state (seeded from the skin's current values by Settings.lua on open) ----
 ; The curated font list is shared by the Quote and Reference family rows: FontListTarget records which one
 ; a click applies to, and FontListX places the overlay under the clicked row (left or right column).
 FontListVisible=0
 FontListTarget=quote
 FontListX=16
+LanguageListVisible=0
+WorkLanguageName=English (Saheeh Intl.)
 WorkFontFamily=Georgia
 WorkFontSize=13
 WorkStyle=Italic

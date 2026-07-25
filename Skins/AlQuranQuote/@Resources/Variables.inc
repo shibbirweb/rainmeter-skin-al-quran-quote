@@ -32,6 +32,18 @@ AutoChange=1
 ; hits the network: load, rotation, and the next-verse control all draw from the offline quotes.txt.
 ; Off by default (offline). Editable from the settings panel.
 OnlineFetchEnabled=0
+; Online verse language. ApiUrl is the full fetch URL (resolved into the WebParser URL at load); most
+; languages are a `translations=<id>` URL, Arabic uses `fields=text_uthmani` (the original ayah). ApiTextField
+; and ApiTextQuant build the WebParser RegExp: "text" with the greedy "(.*?)" for translations, "text_uthmani"
+; with the lazy "(.*)" for Arabic (its text has no inner quotes but numeric fields follow). ApiLanguage/
+; ApiTranslation feed the manual translation-id input and URL building; ApiLanguageName is the settings
+; label. Changing the language rewrites URL and RegExp live via !SetOption. Editable from the settings panel.
+ApiUrl=https://api.quran.com/api/v4/verses/random?language=en&translations=20
+ApiTextField=text
+ApiTextQuant=(.*?)
+ApiLanguage=en
+ApiTranslation=20
+ApiLanguageName=English (Saheeh Intl.)
 ; [MeasureQuran] UpdateRate. It counts skin updates (one per second); the WebParser re-downloads on its own
 ; timer only when the counter reaches this value. Set effectively to "never" so downloads happen only on
 ; load and on demand ([MeasureRotateTick] rotation and the next-verse click, via CommandMeasure Update).

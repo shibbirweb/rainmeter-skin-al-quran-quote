@@ -166,6 +166,20 @@ restored verse being overwritten, `[MeasureQuran]` is `Disabled=1` (no download 
 and only fetches on first run (`VersePersisted=0`). Reset writes `VersePersisted=0` to `LastVerse.inc` so
 it shows a fresh verse after the refresh.
 
+Online language: the fetch URL and the RegExp text field/quantifier come from `#ApiUrl#` /
+`#ApiTextField#` / `#ApiTextQuant#` (resolved at load; default English, translation 20). Most languages use
+a `translations=<id>` URL and extract the greedy `"text":"(.*?)"` (greedy under `(?U)`, for escaped quotes).
+Arabic is special: it has no translation resource, so it uses a `fields=text_uthmani` URL and extracts
+`"text_uthmani":"(.*)"` (LAZY under `(?U)` because the Arabic text has no inner quotes but numeric fields
+follow it, so greedy would over-run). The settings Language control is a click-to-open list (curated in
+`SettingsTheme.inc` as `Lang1Name`/`Lang1Code`/`Lang1Trans` .. `LangCount`, Arabic's `Trans` is the sentinel
+`uthmani`) plus a "type a translation id" input for any of the ~126 quran.com translations. `Settings.lua`'s
+`applyLanguage` persists the url/field/quant/name and rewrites the live measure with `!SetOption MeasureQuran
+URL ...` and `!SetOption ... RegExp ...` (the WebParser must not carry `DynamicVariables`, so `!SetVariable`
+alone would not update the already-resolved options; the regex is passed as a raw Lua `SKIN:Bang` arg, so
+its quotes are safe), then fetches if online. Non-Latin scripts (Arabic, Bengali, Urdu, ...) render only if
+the `QuoteFont` has their glyphs.
+
 Rotation is decoupled from the download so toggling rotation or changing the duration never refetches the
 displayed verse. `[MeasureRotateTick]` (a `Calc`, `DynamicVariables=1`) counts one per second and wraps to
 0 every `RotateEvery` seconds via `(MeasureRotateTick + 1) % #RotateEvery#`; when it hits 0 and
