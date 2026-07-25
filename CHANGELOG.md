@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Quote drop shadow: a "drop shadow" toggle, a shadow color picker (R/G/B/A), and shadow offset X/Y
+  sliders on the settings Text tab (Quote only). The shadow is a manual `[MeterQuoteShadow]` meter (a copy
+  of the quote drawn behind it), so its offset is adjustable, backed by the new `QuoteShadowEnabled`,
+  `QuoteShadowColor`, `QuoteShadowOffsetX`, and `QuoteShadowOffsetY` variables; all apply live without
+  refetching the verse. (Shadow blur/softness is not offered: Rainmeter cannot blur live text.)
+
 ## [1.0.0] - 2026-07-25
 
 ### Fixed

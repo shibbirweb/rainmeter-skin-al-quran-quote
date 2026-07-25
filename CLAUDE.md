@@ -114,7 +114,13 @@ slider, three font-style buttons (Bold / Regular / Italic), and an R/G/B/A color
 sliders + manual entry). The quote applies to `QuoteFont`/`QuoteSize`/`QuoteStyle`/`QuoteColor`, the
 reference to `RefFont`/`RefSize`/`RefStyle`/`RefColor`; the Lua functions mirror each other
 (`setFont`/`setRefFont`, `setStyle`/`setRefStyle`, `setFontColorChannel`/`setRefColorChannel`, etc.) and
-the single font-list overlay is shared via `FontListTarget`/`FontListX`. Other controls: a range slider for
+the single font-list overlay is shared via `FontListTarget`/`FontListX`. Below the Quote column (Quote
+only) there is a "drop shadow" checkbox (`toggleQuoteShadow`, backed by `QuoteShadowEnabled`) and a shadow
+R/G/B/A color picker (`setShadowColorChannel`/`setShadowColorManual`, mirroring the quote color picker,
+backed by `QuoteShadowColor`); to the right of the color picker sit two shadow-offset sliders (X and Y,
+`setShadowOffset`/`nudgeShadowOffset`, backed by `QuoteShadowOffsetX`/`QuoteShadowOffsetY`, clamped to
+`MinShadowOffset`..`MaxShadowOffset`). The shadow is drawn by a manual `[MeterQuoteShadow]` meter (see the
+theme note below), NOT Rainmeter's `StringEffect=SHADOW`, so the offset is adjustable. Other controls: a range slider for
 background color/opacity and border opacity (plus manual inputs), an editable reference label, show/hide
 checkboxes for the reference label and
 the verse number, a "use custom verse" checkbox with a custom-text input and optional sura/verse number
@@ -127,7 +133,9 @@ Sliders are Shape meters (track + fill); click sets the value from
 Checkboxes are Shape meters whose check mark alpha is driven by the bound variable (`... * 255`), with a
 near-transparent fill so the whole box is clickable. Reveal-on-uncheck inputs use the `WidthInput` /
 `HeightInput` groups shown/hidden from Lua. Live state lives in settings-owned working variables
-(`WorkFontSize`, `FontColorR..A`, `WorkFontFamily`, `WorkStyle`, and the reference mirror
+(`WorkFontSize`, `FontColorR..A`, `WorkFontFamily`, `WorkStyle`, the quote shadow color/offset
+`ShadowColorR..A`/`WorkShadowOffsetX`/`WorkShadowOffsetY` (the shadow on/off checkbox reads the real
+`QuoteShadowEnabled`, not a working var), and the reference mirror
 `WorkRefFontSize`, `RefColorR..A`, `WorkRefFontFamily`, `WorkRefStyle`; plus `BgColorR..B`, `WorkOpacity`,
 `WorkDuration`, `WidthAuto`, `FixedWidth`, `HeightAuto`, `FixedHeight`, `AutoChange`, `WorkCustomText`,
 `WorkSuraNumber`, `WorkVerseNumber`) plus the shared toggles
@@ -236,6 +244,19 @@ Background color and border are each stored as RGB + opacity (`PanelColorRGB`/`P
 `PanelBorderRGB`/`PanelBorderOpacity`), so color and opacity change independently; the panel fill composes
 `#PanelColorRGB#,#PanelOpacity#` and the stroke `#PanelBorderRGB#,#PanelBorderOpacity#`. `QuoteStyle` holds
 a Rainmeter `StringStyle` keyword (`Bold`, `Normal`, or `Italic`); the default is `Normal` (Regular).
+
+The quote drop shadow is a MANUAL shadow, not Rainmeter's `StringEffect=SHADOW`. `[MeterQuoteShadow]` is a
+full copy of `[MeterQuote]` (same font/size/style/width/wrapping/text) defined BEFORE it, so it draws
+behind; it is filled with `QuoteShadowColor` and positioned at the quote's center/top plus
+`QuoteShadowOffsetX` (right) and `QuoteShadowOffsetY` (down) pixels, and is `Hidden=(1 -
+#QuoteShadowEnabled#)`. This manual approach is deliberate: Rainmeter's native text shadow has a FIXED
+offset and cannot be blurred, so to make the offset adjustable the shadow must be a real second meter.
+Text-shadow blur/softness is not achievable in Rainmeter at all (no blur filter for live text/shapes), so
+only offset and color are exposed. The offset is kept out of `[MeterPanel]`'s auto-height formula on
+purpose: the clamped range (`MinShadowOffset`..`MaxShadowOffset`, -20..20) always stays within the top
+band and bottom `Pad`, so the shadow never clips and the panel need not grow. Defaults: off, `0,0,0,180`,
+offset `2,2`. Any edit to `[MeterQuote]`'s layout must be mirrored in `[MeterQuoteShadow]` so the two stay
+aligned.
 
 The settings icon on the quote window is hidden when `SettingsIconHidden=1` (its meter is
 `Hidden=#SettingsIconHidden#`); when hidden, the settings panel is reopened by loading `AlQuranQuote\Settings`

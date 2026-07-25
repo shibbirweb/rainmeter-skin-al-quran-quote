@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=496
+SettingsHeight=616
 Col1X=16
 Col2X=316
 Pad=16
@@ -106,6 +106,13 @@ RefFamilyBaseY=78
 RefSizeBaseY=152
 RefStyleBaseY=200
 RefColorBaseY=248
+; Quote drop shadow, stacked below the Quote color block in the left column (Quote only). The shadow
+; color block makes the Text tab's left column the tallest column across all tabs, so ResetBaseY and
+; SettingsHeight below grow to fit it.
+ShadowBaseY=384
+ShadowColorBaseY=436
+; Shadow offset X/Y sliders sit in the right column, level with the shadow color block (Col2X origin).
+ShadowOffsetBaseY=436
 ; Tab 2 (Panel): left column = background color + background/border opacity (sliders); right column =
 ; width + height + settings icon.
 BgColorBaseY=78
@@ -130,8 +137,9 @@ SuraNumberBaseY=174
 VerseNumberBaseY=222
 OfflineVersesBaseY=270
 ChangeVerseBaseY=318
-; Reset button, shown on every tab at the bottom (below the tallest column across all tabs).
-ResetBaseY=454
+; Reset button, shown on every tab at the bottom (below the tallest column across all tabs). The Text
+; tab's Quote drop-shadow color block (ends near 570) is now the tallest, so this sits below it.
+ResetBaseY=574
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
 FontListTop=116
@@ -221,6 +229,14 @@ FontColorR=240
 FontColorG=240
 FontColorB=240
 FontColorA=255
+; Quote drop-shadow working state. The checkbox reads the real QuoteShadowEnabled (like the other
+; checkboxes); ShadowColorR..A back the color picker; WorkShadowOffsetX/Y back the offset sliders.
+ShadowColorR=0
+ShadowColorG=0
+ShadowColorB=0
+ShadowColorA=180
+WorkShadowOffsetX=2
+WorkShadowOffsetY=2
 BgColorR=18
 BgColorG=22
 BgColorB=28

@@ -75,6 +75,15 @@ QuoteStyle=Normal
 RefStyle=Normal
 QuoteColor=240,240,240,255
 RefColor=205,205,205,200
+; Quote drop shadow (Text tab, Quote only). Rendered as a manual shadow: [MeterQuoteShadow] is a copy of
+; the quote drawn behind it, in QuoteShadowColor, displaced by QuoteShadowOffsetX (right) and
+; QuoteShadowOffsetY (down) pixels. QuoteShadowEnabled (0/1) shows or hides that meter. This manual
+; approach (instead of Rainmeter's StringEffect=SHADOW) is what makes the offset adjustable; Rainmeter's
+; native text shadow has a fixed offset and cannot be blurred. All editable from the settings panel.
+QuoteShadowEnabled=0
+QuoteShadowColor=0,0,0,180
+QuoteShadowOffsetX=2
+QuoteShadowOffsetY=2
 ; Background color and border are each split into RGB and opacity so color and opacity change on their own.
 ; The panel fill is PanelColorRGB,PanelOpacity and the border is PanelBorderRGB,PanelBorderOpacity.
 PanelColorRGB=18,22,28
@@ -99,6 +108,9 @@ NextIconHidden=0
 ; Named limits the settings panel clamps numeric input to, so a bad value can never corrupt the skin.
 MinQuoteSize=6
 MaxQuoteSize=48
+; Quote shadow offset bounds, in pixels (negative shifts the shadow up/left).
+MinShadowOffset=-20
+MaxShadowOffset=20
 MinPanelOpacity=0
 MaxPanelOpacity=255
 ; Rotation bounds, in seconds/updates (60 = one minute, 86400 = one day).
