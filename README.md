@@ -5,7 +5,7 @@ A minimal [Rainmeter](https://www.rainmeter.net) skin for Windows that shows a v
 verse appears on a timer, or on demand. It works offline out of the box, and a settings panel lets you
 customise everything without editing files.
 
-![Al-Quran Quote on the desktop](previews/standard.png)
+![Al-Quran Quote on the desktop](previews/preview.png)
 
 ## Features
 
