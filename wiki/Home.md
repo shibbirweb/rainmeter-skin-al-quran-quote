@@ -8,7 +8,7 @@ It is quiet and out of the way. A new verse appears on a timer, or whenever you 
 next to the reference. Everything about it, the fonts, colours, size, how often it changes, and even the
 language, can be changed from a friendly settings panel. No file editing needed.
 
-![Al-Quran Quote on the desktop](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/docs/mockup.png)
+![Al-Quran Quote on the desktop](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/standard.png)
 
 ## What it does, in a nutshell
 
