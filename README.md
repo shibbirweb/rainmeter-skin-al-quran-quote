@@ -1,17 +1,27 @@
 # Al-Quran Quote
 
-A minimal [Rainmeter](https://www.rainmeter.net) skin for Windows that shows a random verse from the
-Holy Quran (Sahih International English translation) with its reference. Click it for the next verse;
-it also rotates on a timer.
+A minimal [Rainmeter](https://www.rainmeter.net) skin for Windows that shows a verse from the Holy Quran
+(Saheeh International English translation) with its reference on a soft, semi-transparent panel. A new
+verse appears on a timer, or on demand. It works offline out of the box, and a settings panel lets you
+customise everything without editing files.
 
 ![mockup](docs/mockup.png)
 
 ## Features
 
-- Random verse fetched live from the free [quran.com API v4](https://api-docs.quran.com).
-- Offline fallback: if there is no internet, a verse from a bundled list is shown instead.
-- Click anywhere on the panel for the next verse; auto-rotates every 30 minutes by default.
-- Small, self-contained panel (no bundled fonts or images). Fully themeable.
+- Shows a Quran verse with its reference; works **offline** out of the box using a bundled list.
+- Optionally fetches fresh random verses live from the free [quran.com API v4](https://api-docs.quran.com).
+- Auto-rotates on a timer (every 30 minutes by default), or change the verse on demand.
+- **Settings panel** for fonts, colours, size, drop shadow, background, rotation, and more, no file editing.
+- Show your own **custom verse**, and pick from many online **languages** (including the original Arabic).
+- Up to **8 independent windows**, one per screen. Small, self-contained (no bundled fonts or images).
+
+## Documentation
+
+Full, step-by-step user documentation lives in the
+**[project Wiki](https://github.com/shibbirweb/rainmeter-skin-al-quran-quote/wiki)**: installation,
+every setting explained, languages, multiple windows, custom and offline verses, an FAQ, and
+troubleshooting.
 
 ## Install
 
@@ -26,12 +36,13 @@ Manual:
 
 ## Configure
 
-All settings live in `Skins/AlQuranQuote/@Resources/Variables.inc`. Edit and refresh the skin.
+Click the **settings icon** on the panel to open the settings window. From its three tabs (Text / Panel /
+Verse) you can change fonts, colours, size, the drop shadow, background, rotation timing, the language,
+the reference label, custom verses, and more. Changes apply immediately and are remembered.
 
-- `RotateEvery` - seconds between automatic verse changes (default 1800 = 30 min).
-- `PanelWidth`, `Pad`, `Radius` - panel size and corner rounding.
-- `QuoteFont`, `RefFont`, `QuoteSize`, `RefSize` - fonts and sizes.
-- `QuoteColor`, `RefColor`, `PanelColor`, `PanelBorder` - colors (R,G,B,A).
+See the **[Wiki](https://github.com/shibbirweb/rainmeter-skin-al-quran-quote/wiki)** for every setting
+explained in detail. (Advanced users can still edit
+`Skins/AlQuranQuote/@Resources/Variables.inc` directly and refresh the skin.)
 
 ## Add an offline verse
 
@@ -40,20 +51,6 @@ Append a line to `Skins/AlQuranQuote/@Resources/quotes.txt` in the form:
 ```
 English translation text | Quran X:Y
 ```
-
-## Release
-
-The `.rmskin` installer is built automatically by GitHub Actions
-([`.github/workflows/rmskin.yml`](.github/workflows/rmskin.yml)) using
-[2bndy5/rmskin-action](https://github.com/2bndy5/rmskin-action), which reads `RMSKIN.ini` and the
-`Skins/` folder. To cut a release:
-
-1. Bump the version in `RMSKIN.ini` (the single source of truth) and add a matching `CHANGELOG.md`
-   section. You do not edit the skin's `[Metadata]` version; CI stamps it from `RMSKIN.ini`.
-2. Tag with the same version and push: `git tag v1.0.0 && git push origin v1.0.0`.
-3. The workflow verifies the tag matches `RMSKIN.ini`, builds the `.rmskin`, and attaches it to the
-   GitHub Release for that tag. (You can also run the workflow manually from the Actions tab to get a
-   build artifact without releasing.)
 
 ## Contributing
 
