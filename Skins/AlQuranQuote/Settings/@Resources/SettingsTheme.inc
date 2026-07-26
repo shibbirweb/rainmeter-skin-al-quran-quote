@@ -8,7 +8,7 @@
 ; Two-column layout: the left column starts at Pad, the right at Col2X. Slider-based controls live in the
 ; left column (their X positions are width-relative); flat controls (labels, inputs, checkboxes) go right.
 SettingsWidth=616
-SettingsHeight=640
+SettingsHeight=664
 Col1X=16
 Col2X=316
 Pad=16
@@ -146,6 +146,10 @@ ChangeVerseBaseY=342
 ; Reset button, shown on every tab at the bottom (below the tallest column across all tabs). The Text
 ; tab's Quote drop-shadow color block (ends near 570) is now the tallest, so this sits below it.
 ResetBaseY=598
+; Footer link ("report an issue / request a feature"), shown on every tab below the Reset button. Opens
+; the GitHub issues page in the browser. SettingsHeight above includes room for it.
+FooterBaseY=636
+IssuesUrl=https://github.com/shibbirweb/rainmeter-skin-al-quran-quote/issues
 
 ; ---- Curated font list (overlay on the Text tab, below the font family row) ----
 FontListTop=140

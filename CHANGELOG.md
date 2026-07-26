@@ -67,6 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - A "Change verse" button to show the next verse from the settings panel (handy when the next-verse icon
     is hidden).
   - Show or hide the settings icon and the next-verse icon on the skin, and a Reset to defaults.
+  - A "Report an issue or request a feature" link at the bottom of the panel, shown on every tab, that
+    opens the GitHub issues page in the browser.
   - Every typed input field notes "(press Enter to apply)" in its tooltip, so it is clear a typed value
     takes effect only on Enter.
 - Multiple quote windows, one per screen: a pool of up to 8 windows (the base plus seven pre-shipped clone
