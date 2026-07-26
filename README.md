@@ -5,7 +5,7 @@ A minimal [Rainmeter](https://www.rainmeter.net) skin for Windows that shows a v
 verse appears on a timer, or on demand. It works offline out of the box, and a settings panel lets you
 customise everything without editing files.
 
-![mockup](docs/mockup.png)
+![Al-Quran Quote on the desktop](previews/standard.png)
 
 ## Features
 
@@ -22,6 +22,20 @@ Full, step-by-step user documentation lives in the
 **[project Wiki](https://github.com/shibbirweb/rainmeter-skin-al-quran-quote/wiki)**: installation,
 every setting explained, languages, multiple windows, custom and offline verses, an FAQ, and
 troubleshooting.
+
+## Screenshots
+
+Customise fonts, colours, size, and shadow from the settings panel:
+
+![Settings panel](previews/settings.png)
+
+Show up to 8 independent windows, one per screen:
+
+![Multiple quote windows](previews/multiple-quotes-window.png)
+
+Read verses in many languages, including the original Arabic:
+
+![Bengali translation](previews/bangla-translation.png)
 
 ## Install
 

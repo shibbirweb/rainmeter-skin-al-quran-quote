@@ -2,6 +2,8 @@
 
 Once installed, Al-Quran Quote just works. Here is everything you can do straight away.
 
+![A verse on the desktop](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/standard.png)
+
 ## Reading the panel
 
 The panel shows two things:
@@ -35,6 +37,8 @@ Look for the small **settings icon** (three little sliders) in the corner of the
 the settings window opens next to the verse. This is where you change fonts, colours, size, timing, the
 language, and more.
 
+![The settings panel](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/settings.png)
+
 Everything you change applies **immediately**, and your choices are remembered even after you restart
 your computer.
 
@@ -51,6 +55,12 @@ your computer.
 | Show verses in another language or Arabic | **[Languages](Languages)** |
 | Show your own verse or dua | **[Offline & Custom Verses](Offline-and-Custom-Verses)** |
 | Put a verse on each monitor | **[Multiple Windows](Multiple-Windows)** |
+
+For example, you can show a different verse on each screen, and pick another language such as Bengali:
+
+![Multiple quote windows, one per screen](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/multiple-quotes-window.png)
+
+![A verse shown in Bengali](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/bangla-translation.png)
 
 ---
 
