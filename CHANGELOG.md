@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-07-26
+
+### Fixed
+
+- The skin now loads automatically after installing the `.rmskin`, instead of having to be loaded by hand
+  from Rainmeter's Manage dialog. `RMSKIN.ini` used the key `LoadName`, which the packager does not
+  recognise as the load directive; it is now `Load=AlQuranQuote\AlQuranQuote.ini`, the key the installer
+  reads to activate window 1 on install.
+
 ## [1.0.0] - 2026-07-25
 
 ### Fixed

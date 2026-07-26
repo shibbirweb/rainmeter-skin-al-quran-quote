@@ -36,7 +36,7 @@ RMSKIN.ini                    Packaging metadata read by the rmskin packager.
 .github/workflows/rmskin.yml  CI: builds the .rmskin and attaches it to the release on a v* tag.
 ```
 
-Paths inside `RMSKIN.ini` (`LoadName`, `VariableFiles`) are relative to `Skins/`, so they stay
+Paths inside `RMSKIN.ini` (`Load`, `VariableFiles`) are relative to `Skins/`, so they stay
 `AlQuranQuote\...` even though the folder now lives under `Skins/`. `VariableFiles` lists the base and every
 clone `Variables.inc` (pipe-separated) so per-window styling survives upgrades.
 
