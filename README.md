@@ -48,6 +48,11 @@ Manual:
    (usually `Documents\Rainmeter\Skins\`).
 3. Open Rainmeter, click **Refresh all**, then load `AlQuranQuote\AlQuranQuote.ini`.
 
+## Also available on
+
+- **DeviantArt:** [shibbirweb on DeviantArt](https://www.deviantart.com/shibbirweb/art/1360611014)
+- **Rainmeter Forum:** [Share Your Creations thread](https://forum.rainmeter.net/viewtopic.php?p=243912)
+
 ## Configure
 
 Click the **settings icon** on the panel to open the settings window. From its three tabs (Text / Panel /
