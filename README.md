@@ -25,6 +25,10 @@ troubleshooting.
 
 ## Screenshots
 
+Simple and minimal screen:
+
+![Simple screen](previews/standard.png)
+
 Customise fonts, colours, size, and shadow from the settings panel:
 
 ![Settings panel](previews/settings.png)
