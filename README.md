@@ -1,4 +1,4 @@
-# Al-Quran Quote
+# Al-Quran Quote - Rainmeter Skin
 
 A minimal [Rainmeter](https://www.rainmeter.net) skin for Windows that shows a verse from the Holy Quran
 (Saheeh International English translation) with its reference on a soft, semi-transparent panel. A new
