@@ -10,6 +10,10 @@ language, can be changed from a friendly settings panel. No file editing needed.
 
 ![Al-Quran Quote on the desktop](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/standard.png)
 
+Want to see the whole thing at once? Here is
+[every feature in one combined screenshot](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/all-combined.png)
+(large image).
+
 ## What it does, in a nutshell
 
 - Shows a Quran verse with its reference on a soft, semi-transparent panel.
@@ -37,7 +41,21 @@ language, can be changed from a friendly settings panel. No file editing needed.
 - **[Frequently Asked Questions](FAQ)** - quick answers.
 - **[Troubleshooting](Troubleshooting)** - fixes for the most common issues.
 
+## Credits
+
+Verse data comes from the [quran.com API](https://quran.com) (Saheeh International translation).
+
+The screenshots on this wiki use a few third-party resources. None of them are bundled with the skin,
+which ships no font or image files:
+
+- Wallpaper: [Silhouette of mountains during night time](https://unsplash.com/photos/silhouette-of-mountains-during-nigh-time-photography-v7daTKlZzaw)
+  by Daniel Leone on Unsplash.
+- English font: [Amaranth](https://fonts.google.com/specimen/Amaranth) (Google Fonts).
+- Bengali font: [Li Mayukh Unicode](https://lipighor.com/Mayukh.html) (Lipighor).
+
+The skin's own defaults are Calibri for the verse and Segoe UI for the reference, both standard on
+Windows. See **[Text & Appearance](Text-and-Appearance)** to change them.
+
 ---
 
-*Al-Quran Quote is free and open source (MIT licence). Verse data comes from the
-[quran.com API](https://quran.com).*
+*Al-Quran Quote is free and open source (MIT licence).*

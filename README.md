@@ -41,6 +41,12 @@ Read verses in many languages, including the original Arabic:
 
 ![Bengali translation](previews/bangla-translation.png)
 
+Pin your own text with a custom verse:
+
+![Custom single verse](previews/custom-single-verse.png)
+
+Everything at a glance: [one combined screenshot](previews/all-combined.png) (large image).
+
 ## Install
 
 Easiest: download the `.rmskin` from the [Releases](../../releases) page and double-click it.
@@ -75,6 +81,11 @@ Append a line to `Skins/AlQuranQuote/@Resources/quotes.txt` in the form:
 English translation text | Quran X:Y
 ```
 
+The settings panel's **Verse** tab has an **Open file in Notepad** control that opens this file for you.
+Saved edits appear on the next verse change, with no refresh needed:
+
+![Editing the offline verse list](previews/offline-verses.png)
+
 ## Contributing
 
 See the [Developer Guide](docs/DEVELOPER.md) for architecture, local setup, debugging, and the
@@ -84,3 +95,14 @@ release process.
 
 - Verse data: [quran.com API](https://quran.com) (Saheeh International translation).
 - License: MIT (see [LICENSE](LICENSE)).
+
+Third-party resources shown in the screenshots. None of these are bundled with the skin, which ships no
+font or image files:
+
+- Wallpaper: [Silhouette of mountains during night time](https://unsplash.com/photos/silhouette-of-mountains-during-nigh-time-photography-v7daTKlZzaw)
+  by Daniel Leone on Unsplash.
+- English font: [Amaranth](https://fonts.google.com/specimen/Amaranth) (Google Fonts).
+- Bengali font: [Li Mayukh Unicode](https://lipighor.com/Mayukh.html) (Lipighor).
+
+The skin's own defaults are Calibri for the verse and Segoe UI for the reference, both standard on
+Windows. Pick any installed font from the settings panel.

@@ -15,6 +15,8 @@ the skin cycles through this list. You can add your own favourites to it.
 3. Add or edit lines, then **save** the file. The next verse change picks up your edits automatically, no
    refresh needed.
 
+![Editing the offline verse list in Notepad](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/offline-verses.png)
+
 ### The line format
 
 Each verse is one line, with the text and the reference separated by a vertical bar `|`:
@@ -43,6 +45,8 @@ the list.
 2. Type your text in the **custom text** box and press Enter.
 3. Optionally type a **sura** (chapter) number and a **verse** number. Both are optional. Leave them blank
    and only your label shows.
+
+![A custom verse on the desktop, with the Verse tab that set it](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/custom-single-verse.png)
 
 While custom verse is on:
 
