@@ -29,7 +29,10 @@ language's letters.
 - **English and most European languages** - almost any font works. The default Calibri is fine.
 - **Arabic** - choose an Arabic-capable font (for example *Traditional Arabic*, *Amiri*, or another
   Arabic font installed on your PC).
-- **Other scripts** (Bengali, Urdu, etc.) - choose a font made for that script.
+- **Other scripts** (Bengali, Urdu, etc.) - choose a font made for that script. The Bengali screenshots
+  on this wiki use [Li Mayukh Unicode](https://lipighor.com/Mayukh.html), a free Bengali font.
+
+![A verse shown in Bengali](https://raw.githubusercontent.com/shibbirweb/rainmeter-skin-al-quran-quote/master/previews/bangla-translation.png)
 
 If you switch to a language and see boxes, question marks, or blank text, that is the font, not the skin.
 Change the quote font on the **Text** tab to one that supports the script. See
