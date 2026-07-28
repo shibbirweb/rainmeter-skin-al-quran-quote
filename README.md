@@ -16,6 +16,17 @@ customise everything without editing files.
 - Show your own **custom verse**, and pick from many online **languages** (including the original Arabic).
 - Up to **8 independent windows**, one per screen. Small, self-contained (no bundled fonts or images).
 
+## Install
+
+Easiest: download the `.rmskin` from the [Releases](../../releases) page and double-click it.
+
+Manual:
+
+1. Install Rainmeter from https://www.rainmeter.net.
+2. Copy `Skins/AlQuranQuote` from this repo into your Rainmeter skins folder
+   (usually `Documents\Rainmeter\Skins\`).
+3. Open Rainmeter, click **Refresh all**, then load `AlQuranQuote\AlQuranQuote.ini`.
+
 ## Documentation
 
 Full, step-by-step user documentation lives in the
@@ -46,17 +57,6 @@ Pin your own text with a custom verse:
 ![Custom single verse](previews/custom-single-verse.png)
 
 Everything at a glance: [one combined screenshot](previews/all-combined.png) (large image).
-
-## Install
-
-Easiest: download the `.rmskin` from the [Releases](../../releases) page and double-click it.
-
-Manual:
-
-1. Install Rainmeter from https://www.rainmeter.net.
-2. Copy `Skins/AlQuranQuote` from this repo into your Rainmeter skins folder
-   (usually `Documents\Rainmeter\Skins\`).
-3. Open Rainmeter, click **Refresh all**, then load `AlQuranQuote\AlQuranQuote.ini`.
 
 ## Also available on
 
